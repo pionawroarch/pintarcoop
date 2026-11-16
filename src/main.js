@@ -1596,6 +1596,8 @@ function colAt(x,z,y){if(y!==undefined&&y>450){const sh=spaceH(x,z,y);if(sh!==nu
 // poziom wody w danej kolumnie: rzeki górskie mają własny poziom (ch.wlev), reszta świata — WATER
 function wlAt(x,z){const cx=Math.floor(x/C),cz=Math.floor(z/C);let ch=chunks.get(K(cx,cz));if(!ch||!ch.heights)ch=hcache.get(K(cx,cz));if(!ch||!ch.wlev)return WATER;return ch.wlev[(Math.floor(z)-cz*C)*C+Math.floor(x)-cx*C]||WATER}
 const wetAt=(x,z,h)=>h<WATER||h<wlAt(x,z);
+// wrogowie lądowi brodzą/płyną po wodzie: wysokość tułowia przy tafli (głęboka woda) albo na dnie (płycizna)
+const eWadeY=(x,z,h,e)=>{const wl=Math.max(WATER,wlAt(x,z));return Math.max(h,wl-Math.min(1.0,0.55*eSc(e)+0.25))};
 function biomeAt(x,z){const cx=Math.floor(x/C),cz=Math.floor(z/C);let ch=chunks.get(K(cx,cz));if(!ch||!ch.biomes)ch=hcache.get(K(cx,cz));if(!ch||!ch.biomes)return -1;return ch.biomes[(Math.floor(z)-cz*C)*C+Math.floor(x)-cx*C]}
 function maxH(x,z){let m=-1;for(const ox of [-PR,PR])for(const oz of [-PR,PR]){const h=colAt(x+ox,z+oz,player.p.y);if(h===null)return null;if(h>m)m=h}return m}
 
@@ -3620,7 +3622,7 @@ function spawnTick(){
 const NAV={c:new Map(),cs:new Map(),t:0,budget:0,R:26};
 const NAVN=(NAV.R*2+1)*(NAV.R*2+1),NAVG=new Float32Array(NAVN),NAVF=new Float32Array(NAVN),NAVP=new Int32Array(NAVN),NAVS=new Uint8Array(NAVN),NAVH=new Int32Array(NAVN+8);
 function navCell(ix,iz,y){const sp=y>450,M=sp?NAV.cs:NAV.c,k=vkey(ix,iz);let v=M.get(k);if(v!==undefined)return v;const x=ix+0.5,z=iz+0.5,h=colAt(x,z,sp?y:undefined);
-  if(h===null)v=-1;else if(sp)v=h>y+6?-1:h;else if(wetAt(x,z,h))v=-1;else if(VOX.size&&voxProbe(x,z,h,0.3,1.6).block)v=-1;else if(solidAt(x,h+0.9,z))v=-1;else v=h;
+  if(h===null)v=-1;else if(sp)v=h>y+6?-1:h;else if(wetAt(x,z,h))v=Math.max(h,Math.max(WATER,wlAt(x,z))-0.8);else if(VOX.size&&voxProbe(x,z,h,0.3,1.6).block)v=-1;else if(solidAt(x,h+0.9,z))v=-1;else v=h;
   M.set(k,v);return v}
 const NDI=[1,-1,0,0,1,1,-1,-1],NDJ=[0,0,1,-1,1,-1,1,-1];
 const navStep=(ha,hb)=>hb>=0&&hb-ha<=1.05&&ha-hb<=3.6;
@@ -3663,7 +3665,7 @@ function tacticsTick(dt,pl){TAC.t-=dt;if(TAC.t>0)return;TAC.t=0.4;const G=new Ma
     for(const e of L)e._td=Math.hypot(e.p.x-tg.p.x,e.p.z-tg.p.z);L.sort((a,b)=>a._td-b._td);const near=L.filter(e=>e._td<14),inner=near.slice(0,6),outer=near.slice(6);for(const e of L)if(e._td>=14)e.slot=null;
     const ring=(M,rad,out)=>{const n=M.length;if(!n)return;for(const e of M)e._a=Math.atan2(e.p.x-tg.p.x,e.p.z-tg.p.z);M.sort((a,b)=>a._a-b._a);let sx=0,sy=0;M.forEach((e,i)=>{const o=e._a-i*6.2832/n;sx+=Math.cos(o);sy+=Math.sin(o)});const a0=Math.atan2(sy,sx);M.forEach((e,i)=>{e.slot={id,a:a0+i*6.2832/n,r:rad(e),out}})};
     ring(inner,e=>Math.max(1.1,eReach(e)*0.82),0);ring(outer,e=>eReach(e)+2.8,1)}}
-function sepOk(e,x,z){if(e.st===2||e.car)return false;const d=EDEF[e.t];if(d.fly)return true;const h=colAt(x,z,e.p.y);if(h===null)return false;if(d.swim)return h<WATER-1.6;return !wetAt(x,z,h)&&Math.abs(h-e.p.y)<=1.05}
+function sepOk(e,x,z){if(e.st===2||e.car)return false;const d=EDEF[e.t];if(d.fly)return true;const h=colAt(x,z,e.p.y);if(h===null)return false;if(d.swim)return h<WATER-1.6;if(wetAt(x,z,h))return !d.passive;return Math.abs(h-e.p.y)<=1.05}
 function simEnemies(dt){
   const pl=playersList().filter(p=>!p.dead);
   NAV.budget=3;NAV.t-=dt;if(NAV.t<=0||NAV.c.size>90000){NAV.t=4;NAV.c.clear();NAV.cs.clear()}
@@ -3724,9 +3726,10 @@ function simEnemies(dt){
       // stwory morskie krążą w głębinie; wynurzają się dopiero, gdy ruszają do ataku
       const eng=(tg&&td<eReach(e)+5)||(e.wind>0)||(e.hurtT>0)||e.st===2;if(e.hurtT>0)e.hurtT-=dt;const gr=colAt(e.p.x,e.p.z,WATER),sc=eSc(e),deep=Math.max((gr??WATER-8)+0.6+sc*0.5,WATER-1.15-Math.min(7,2.5+sc*1.6));
       const ty=eng?WATER-1.15+Math.sin(performance.now()*0.002+e.id)*0.08:deep;e.p.y+=(ty-e.p.y)*Math.min(1,dt*(eng?3.2:1.2))}
-    else if(h!==null&&!wetAt(nx,nz,h)&&h-e.p.y<=1.05&&e.p.y-h<4&&!(VOX.size&&!d.fly&&eSc(e)<2.6&&voxProbe(nx,nz,e.p.y,0.3*Math.min(1.6,eSc(e)),1.5*eSc(e)).block)){e.p.x=nx;e.p.z=nz;e.p.y+=(h-e.p.y)*Math.min(1,14*dt)}else{e.vx*=-0.3;e.vz*=-0.3;if(e.wan)e.wan.t=0}
+    else if(h!==null&&wetAt(nx,nz,h)&&!d.passive&&!d.fly){const ty=eWadeY(nx,nz,h,e);if(ty-e.p.y<=1.1){e.p.x=nx;e.p.z=nz;e.vx*=1-Math.min(0.6,dt*2.2);e.vz*=1-Math.min(0.6,dt*2.2);e.p.y+=(ty+Math.sin(performance.now()*0.004+e.id)*0.05-e.p.y)*Math.min(1,6*dt);e.wade=0.25}else{e.vx*=-0.3;e.vz*=-0.3;if(e.wan)e.wan.t=0}}
+    else if(h!==null&&!wetAt(nx,nz,h)&&h-e.p.y<=1.05+(e.wade>0?0.5:0)&&e.p.y-h<4&&!(VOX.size&&!d.fly&&eSc(e)<2.6&&voxProbe(nx,nz,e.p.y,0.3*Math.min(1.6,eSc(e)),1.5*eSc(e)).block)){e.p.x=nx;e.p.z=nz;e.p.y+=(h-e.p.y)*Math.min(1,14*dt);if(e.wade>0)e.wade-=dt}else{e.vx*=-0.3;e.vz*=-0.3;if(e.wan)e.wan.t=0}
     if(!d.fly&&!e.car&&!d.swim&&!e.sid){try{villageCollide(e.p)}catch(_){}}
-    if(!d.fly&&!e.car&&!d.swim){const c0=colAt(e.p.x,e.p.z,e.p.y),s0=e.sid?structGround(e.p.x,e.p.z,e.p.y):null,g0=Math.max(c0??-1e9,s0??-1e9);if(g0>-1e8&&g0>=WATER-0.6&&e.p.y>g0+0.04)e.p.y=Math.max(g0,e.p.y-16*dt)}
+    if(!d.fly&&!e.car&&!d.swim){const c0=colAt(e.p.x,e.p.z,e.p.y),s0=e.sid?structGround(e.p.x,e.p.z,e.p.y):null,g0=Math.max(c0??-1e9,s0??-1e9);if(g0>-1e8&&g0>=WATER-0.6&&e.p.y>g0+0.04&&!(c0!==null&&wetAt(e.p.x,e.p.z,c0)))e.p.y=Math.max(g0,e.p.y-16*dt)}
     e.speed=Math.hypot(e.vx,e.vz);
   }
   // rozpychanie

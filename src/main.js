@@ -2016,7 +2016,8 @@ function myState(){return{id:NET.id,name:S.name,color:S.color,p:[+player.p.x.toF
 function pushSample(st){const r=remoteFor(st.id,st.name,st.color);r.seen=performance.now();r.buf.push({...st,t:performance.now()});if(r.buf.length>30)r.buf.shift()}
 function startNet(role){
   stopNet(); const room=$('room').value.trim()||'navro';
-  try{NET.tr=(location.protocol==='file:'&&$('ip')&&$('ip').value.trim())?new WSTransport('ws://'+$('ip').value.trim()+':7777'):new BCTransport(room)}catch(e){status('Nie udało się otworzyć połączenia: '+e.message,true);return}
+  const DESK=window.coopDesktop;if(DESK&&role==='join'&&!(($('ip')&&$('ip').value.trim()))){status('Wpisz IP hosta z Radmin VPN',true);return}
+  try{NET.tr=DESK?new WSTransport('ws://'+(role==='host'?'127.0.0.1':$('ip').value.trim())+':'+(DESK.port||7777)):(location.protocol==='file:'&&$('ip')&&$('ip').value.trim())?new WSTransport('ws://'+$('ip').value.trim()+':7777'):new BCTransport(room)}catch(e){status('Nie udało się otworzyć połączenia: '+e.message,true);return}
   NET.role=role; NET.host=role==='host'?NET.id:null; NET.tr.on=onNet; NET.tr.onclose=()=>{if(NET.role!=='off'){status('Połączenie zamknięte',true);stopNet()}};
   status(role==='host'?'Hostujesz pokój „'+room+'”. Drugi gracz: Dołącz z tym samym kodem.':'Szukam hosta w pokoju „'+room+'”…');
   refreshPlayers();
@@ -2126,6 +2127,10 @@ $('host').onclick=()=>startNet('host'); $('join').onclick=()=>startNet('client')
 $('closemenu').onclick=toggleMenu; $('menubtn').onclick=toggleMenu; $('mapbtn').onclick=toggleMap; $('mapwrap').onclick=e=>{if(e.target.id==='mapwrap'||e.target.id==='mapclose')toggleMap()};
 $('mapcenter').onclick=()=>{mapV.follow=true};
 if(typeof BroadcastChannel==='undefined')status('Ta przeglądarka nie obsługuje testu co-op w kartach',true); else status('Gra solo. Hostuj albo dołącz do pokoju.');
+// wersja .exe (Electron): pole IP hosta, lista własnych adresów (Radmin VPN to zwykle 26.x.x.x), przekaźnik WebSocket na porcie 7777 działa w tle aplikacji
+if(window.coopDesktop){try{$('ipbox').style.display='block';try{$('ip').value=localStorage.getItem('coop1.ip')||''}catch(_){}$('ip').addEventListener('change',()=>{try{localStorage.setItem('coop1.ip',$('ip').value.trim())}catch(_){}});
+  const ips=window.coopDesktop.ips||[],rad=ips.filter(a=>a.startsWith('26.'));$('myip').textContent=ips.length?('Twoje IP: '+(rad.length?rad.join(', ')+' (Radmin VPN)':ips.join(', '))+' — podaj je drugiemu graczowi, gdy hostujesz.'):'';
+  $('coopnote').textContent='Host klika Hostuj. Drugi gracz wpisuje IP hosta z Radmin VPN i klika Dołącz. Kod pokoju nie jest potrzebny. Przy pierwszym hostowaniu Windows może zapytać o zgodę zapory — zezwól.'}catch(e){}}
 
 // =================== ETAP 3: klasy, doświadczenie, poziomy, perki (dane) ===================
 const CLS={

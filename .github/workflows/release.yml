@@ -1,0 +1,49 @@
+name: Release (.exe)
+
+on:
+  push:
+    branches: [main]
+    paths: ['index.html', 'desktop/**', '.github/workflows/release.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Przygotuj pliki gry (Three.js lokalnie, bez internetu)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path desktop/app | Out-Null
+          Invoke-WebRequest -Uri https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js -OutFile desktop/app/three.min.js
+          $html = Get-Content -Raw -Encoding UTF8 index.html
+          $html = $html.Replace('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', 'three.min.js')
+          [System.IO.File]::WriteAllText("$PWD/desktop/app/index.html", $html, (New-Object System.Text.UTF8Encoding($false)))
+
+      - name: Zbuduj instalator i wersję portable
+        working-directory: desktop
+        run: |
+          npm version 1.0.${{ github.run_number }} --no-git-tag-version --allow-same-version
+          npm install
+          npx electron-builder --win --x64 --publish never
+
+      - name: Opublikuj wydanie
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Gra CO-OP v1.0.${{ github.run_number }}
+          body: |
+            **Gra-CO-OP-…-instalator.exe** — instalator (skrót na pulpicie, menu Start).
+            **Gra-CO-OP-…-portable.exe** — wersja bez instalacji, wystarczy uruchomić.
+
+            Gra przez Radmin VPN: host klika *Hostuj*, drugi gracz wpisuje IP hosta z Radmina (26.x.x.x) i klika *Dołącz*. Przy pierwszym hostowaniu zezwól aplikacji w zaporze Windows.
+          files: desktop/dist/*.exe
+          make_latest: true

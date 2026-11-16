@@ -1,0 +1,42 @@
+{
+  "name": "gra-coop",
+  "productName": "Gra CO-OP",
+  "version": "1.0.0",
+  "description": "Kooperacyjna gra voxelowa (Radmin VPN)",
+  "main": "main.js",
+  "author": "pionawroarch",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --x64 --publish never"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "eu.navro.gracoop",
+    "productName": "Gra CO-OP",
+    "directories": { "output": "dist" },
+    "files": ["main.js", "preload.js", "app/**/*", "package.json"],
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "Gra CO-OP",
+      "artifactName": "Gra-CO-OP-${version}-instalator.${ext}"
+    },
+    "portable": {
+      "artifactName": "Gra-CO-OP-${version}-portable.${ext}"
+    }
+  }
+}

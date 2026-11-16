@@ -488,10 +488,11 @@ input,select{border-radius:0!important;border:none!important;background:#1a120b!
       <h2>Co-op</h2>
       <div class="row"><div style="flex:1"><label for="nick">Nick</label><input id="nick" maxlength="16"></div><div><label for="col">Kolor</label><input id="col" type="color"></div></div>
       <label for="room">Kod pokoju</label><input id="room" value="navro" maxlength="24">
+      <div id="ipbox" style="display:none"><label for="ip">IP hosta z Radmin VPN (tylko przy Dołącz)</label><input id="ip" placeholder="np. 26.123.45.67" maxlength="40"><p class="note" id="myip"></p></div>
       <div class="btns"><button id="host" class="pri">Hostuj</button><button id="join">Dołącz</button><button id="leave">Rozłącz</button></div>
       <div id="netstat"></div>
       <ul id="players"></ul>
-      <p class="note">Test w tej wersji: otwórz grę w drugiej karcie tej samej przeglądarki, w jednej kliknij Hostuj, w drugiej Dołącz. Gra przez Radmin VPN między komputerami zadziała w wersji .exe (ten sam protokół, połączenie po IP z Radmina).</p>
+      <p class="note" id="coopnote">Test w tej wersji: otwórz grę w drugiej karcie tej samej przeglądarki, w jednej kliknij Hostuj, w drugiej Dołącz. Gra przez Radmin VPN między komputerami działa w wersji .exe (połączenie po IP z Radmina).</p>
     </section>
   </div>
   <div class="btns" style="justify-content:flex-end;margin-top:16px"><button id="closemenu" class="pri">Wróć do gry</button></div>

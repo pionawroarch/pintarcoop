@@ -39,10 +39,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
-          name: Gra CO-OP v1.0.${{ github.run_number }}
+          name: Pintar v1.0.${{ github.run_number }}
           body: |
-            **Gra-CO-OP-…-instalator.exe** — instalator (skrót na pulpicie, menu Start).
-            **Gra-CO-OP-…-portable.exe** — wersja bez instalacji, wystarczy uruchomić.
+            **Pintar-…-instalator.exe** — instalator (skrót na pulpicie, menu Start).
+            **Pintar-…-portable.exe** — wersja bez instalacji, wystarczy uruchomić.
 
             Gra przez Radmin VPN: host klika *Hostuj*, drugi gracz wpisuje IP hosta z Radmina (26.x.x.x) i klika *Dołącz*. Przy pierwszym hostowaniu zezwól aplikacji w zaporze Windows.
           files: desktop/dist/*.exe

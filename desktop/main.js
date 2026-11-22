@@ -1,4 +1,4 @@
-// Gra CO-OP — wersja .exe (Electron)
+// Pintar — wersja .exe (Electron)
 // Okno gry + przekaźnik WebSocket na porcie 7777 do gry przez Radmin VPN:
 // host łączy się z własnym przekaźnikiem (127.0.0.1), drugi gracz z IP hosta z Radmina.
 const { app, BrowserWindow, Menu, shell } = require('electron');
@@ -28,7 +28,8 @@ function createWindow() {
     width: 1600,
     height: 900,
     backgroundColor: '#1a140e',
-    title: 'Gra CO-OP',
+    title: 'Pintar',
+    icon: path.join(__dirname, 'build', 'icon.png'),
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),

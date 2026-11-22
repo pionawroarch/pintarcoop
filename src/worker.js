@@ -27,9 +27,15 @@ function fbm(x,y,o){let a=1,f=1,s=0,n=0;for(let i=0;i<o;i++){s+=a*simplex(x*f,y*
 function hash(x,z,k){let h=(SEED^Math.imul(x,374761393)^Math.imul(z,668265263)^Math.imul(k,1442695041))|0;h=Math.imul(h^(h>>>13),1274126177);h^=h>>>16;return(h>>>0)/4294967296}
 const sstep=(a,b,x)=>{const t=Math.min(1,Math.max(0,(x-a)/(b-a)));return t*t*(3-2*t)};
 
-const TREES=new Set([0,1,2,3,4,8,14,15,16,17]);
-const TP={15:0.04,1:0.15,2:0.09,3:0.85,4:0.1,5:0.3,6:0.3,7:0.4,8:0.14,9:0.95,10:0.8,11:0.5,12:0.05};
-function treeFor(b,h,r2){switch(b){case 15:return r2<0.6?4:14;case 3:return r2<0.62?0:r2<0.84?2:1;case 2:return r2<0.8?0:2;case 4:return 4;case 5:return 8;case 6:return h>WATER+40?8:1;case 1:return 3;case 7:return 0;case 8:return 14;case 9:return r2<0.8?15:0;case 10:return r2<0.7?16:r2<0.85?2:0;case 11:return r2<0.85?17:2;case 12:return 2}return -1}
+// nietypowe struktury w biomach (indeksy TK 32+)
+const LMB={57:[76,77,34,76],58:[38,78],59:[79,79,29],60:[36,80,80],61:[81,81,75],62:[82,54],63:[83,88],64:[84,59],65:[37,34,85],66:[86,87],67:[88,44],68:[89,90,37],49:[66,66,75],50:[67,67,41],51:[36,44],52:[66,36],53:[70,70,45],54:[71,72,71],55:[73,73,63],56:[45,44,47],39:[53,53,53,36],40:[62,32,45],41:[55,55,55,43],42:[45,44,47,51],43:[61,61,40],44:[63,63,36,37],45:[58,57,40],46:[34,40,41],47:[59,59,46],48:[60,60,41,33],32:[46,43],33:[39,47],34:[44,32],35:[38,33],36:[34,47,36],38:[40,45,47],1:[37],2:[32,36,40,44,45],3:[39,35,44,45],4:[33,34,32],5:[43,46,35],6:[38,43,45],7:[39,44],8:[42,34,35],9:[41,39],10:[39,44,45],11:[44,36],12:[36,45],15:[33,32,34],16:[47,43],18:[38],19:[39],20:[47,34],21:[46],24:[35,39,43],25:[40,36,32],26:[41],27:[39,35],28:[33,34],29:[44,36],30:[37,39],31:[42,35,34]};
+const LMP={57:0.8,58:0.5,59:0.6,60:0.6,61:0.7,62:0.5,63:0.4,64:0.4,65:0.75,66:0.6,67:0.5,68:0.85,49:0.8,50:0.85,53:0.7,54:0.7,55:0.7,56:0.5,39:0.75,41:0.95,47:0.7,48:0.85,43:0.6,45:0.7,44:0.55,1:0.3,2:0.45,4:0.5,15:0.55,20:0.6,28:0.6,18:0.6};
+const XTRA={2:[0.05,6,7,10],3:[0.07,13,11,6,7],5:[0.03,6],6:[0.06,6],7:[0.08,31,13],8:[0.04,6,19],9:[0.12,13,24,11],10:[0.06,11,13,6],11:[0.06,7,10],12:[0.04,6,7],24:[0.06,13,11,6],25:[0.03,6,7],27:[0.08,13,11],29:[0.04,7,10],31:[0.03,6]};
+// promień dużych dekoracji-punktów orientacyjnych (w blokach) — do odsuwania od wiosek, miast i struktur
+const BIGR={76:20,77:10,89:13,34:9,37:11,81:8,79:6,38:7,75:7,36:5,59:5,85:4,88:3,90:5,44:6,82:4,83:6,84:5,86:6,87:3,78:6,80:4};
+const TREES=new Set([0,1,2,3,4,8,14,15,16,17,26,27,30,48,54,68,69,78,83,84,86]);
+const TP={57:0.01,58:0.4,59:0,60:0.04,61:0.02,62:0.2,63:0.5,64:0.45,65:0,66:0.5,67:0.08,68:0,49:0.01,51:0.45,52:0.35,53:0.1,54:0.05,55:0.04,56:0.45,39:0.12,42:0.5,43:0.22,44:0.45,45:0.02,46:0.06,32:0.025,33:0.12,34:0.55,35:0.004,36:0.3,38:0.02,15:0.04,1:0.15,2:0.09,3:0.85,4:0.1,5:0.3,6:0.3,7:0.4,8:0.14,9:0.95,10:0.8,11:0.5,12:0.05,24:0.8,25:0.025,26:0.95,27:0.6,28:0.01,29:0.04,30:0.55,31:0.05};
+function treeFor(b,h,r2){switch(b){case 57:return 54;case 58:return r2<0.8?78:48;case 60:return 1;case 61:return 1;case 62:return 54;case 63:return r2<0.65?83:0;case 64:return r2<0.75?84:8;case 66:return r2<0.75?86:54;case 67:return 17;case 49:return 4;case 51:return r2<0.8?68:2;case 52:return r2<0.6?1:26;case 53:return 27;case 54:return 0;case 55:return 1;case 56:return r2<0.85?69:54;case 39:return r2<0.6?0:2;case 42:return 54;case 43:return r2<0.6?27:2;case 44:return r2<0.7?1:8;case 45:return 0;case 46:return 3;case 32:return 8;case 33:return r2<0.55?2:0;case 34:return r2<0.85?17:2;case 35:return 4;case 36:return 48;case 38:return 0;case 15:return r2<0.6?4:14;case 3:return r2<0.62?0:r2<0.84?2:1;case 2:return r2<0.8?0:2;case 4:return 4;case 5:return 8;case 6:return h>WATER+40?8:1;case 1:return 3;case 7:return 0;case 8:return 14;case 9:return r2<0.8?15:0;case 10:return r2<0.7?16:r2<0.85?2:0;case 11:return r2<0.85?17:2;case 12:return 2;case 24:return r2<0.55?1:r2<0.8?8:2;case 25:return r2<0.6?0:2;case 26:return r2<0.85?25:15;case 27:return r2<0.75?26:1;case 28:return 4;case 29:return r2<0.6?0:2;case 30:return 27;case 31:return r2<0.7?30:14}return -1}
 // Biomy: 0 ocean, 1 plaża, 2 równiny, 3 las, 4 pustynia, 5 tundra, 6 góry, 7 bagna
 function base1(x,z,low){
   const cont=fbm(x/1100+11.3,z/1100-7.1,5)*1.35+0.12;
@@ -89,8 +95,10 @@ function sample1(x,z){
   else if(hum>0.32&&h<WATER+5) b=7;
   else if(temp>0.2&&hum>0.26) b=9;
   else if(temp>0.12&&hum<0.16) b=8;
+  else if(temp<-0.15&&hum>0.06) b=24;   // tajga: zimny, wilgotny las iglasty
   else if(hum>0.08){const sk=fbm(x/520+71,z/520-33,2);b=sk>0.38?11:(temp<-0.06?10:3)}
   else if(temp<-0.1) b=12;
+  else if(hum<-0.14&&temp>-0.05) b=25;
   else b=2;
   return [h,b,wl];
 }
@@ -99,6 +107,8 @@ function sample1(x,z){
 let GEN=1;
 function sample(x,z){return GEN===2?sample2(x,z):sample1(x,z)}
 function sH(x,z){const r=sample(x,z);return r[2]?WATER-5:r[0]}
+// ===== wyspy na otwartym morzu (cel wypraw łodzią, z lochami w środku) =====
+const IC=560;function islandAt(gx,gz){if(hash(gx,gz,1301)>=0.42)return null;const x=(gx+0.3+hash(gx,gz,1302)*0.4)*IC,z=(gz+0.3+hash(gx,gz,1303)*0.4)*IC;return{x,z,rad:26+hash(gx,gz,1304)*26,pk:12+hash(gx,gz,1305)*10}}
 function base2(x,z,low){
   const cont=fbm(x/1100+11.3,z/1100-7.1,5)*1.35+0.12;
   const temp=fbm(x/1500+97,z/1500+13,3), hum=fbm(x/1200-311,z/1200+57,3);
@@ -118,6 +128,7 @@ function base2(x,z,low){
   const vr=fbm(x/2600-91,z/2600+47,2),vol=fbm(x/650+777,z/650-333,2)-(1-sstep(0.02,0.25,vr))*0.7;let lava=0,volc=0;
   if(vol>0.48&&land>0.6){const k=sstep(0.48,0.64,vol);volc=k;h+=k*k*52;if(vol>0.64){const c=sstep(0.64,0.7,vol);h-=c*34;if(vol>0.69){lava=1;h=Math.max(h,WATER+9)}}}
   {const cl=fbm(x/160+7,z/160-3,2);if(cl>0.2)h+=sstep(0.2,0.38,cl)*sstep(0.015,0.07,cont)*(1-sstep(0.2,0.35,cont))*9}
+  {const I=islandAt(Math.floor(x/IC),Math.floor(z/IC));if(I&&cont<0.02){const d=Math.hypot(x-I.x,z-I.z)*(1+0.18*fbm(x/40+5,z/40-3,2));if(d<I.rad){const k=1-d/I.rad,ih=WATER-7+Math.pow(k,0.55)*I.pk+(low?0:fbm(x/22,z/22,2)*2.2*k);if(ih>h)h=ih}}}
   const lk=fbm(x/430+101,z/430-17,2);let lakeK=0;
   if(lk>0.22&&h>WATER-1&&!lava&&volc<0.3){lakeK=sstep(0.12,0.16,cont)*(1-sstep(0.35,0.45,mm))*(1-sstep(0.2,0.3,bad));if(lakeK>0){const up=h-(WATER+1.5);if(up>0)h=WATER+1.5+up*(1-sstep(0.22,0.36,lk)*lakeK)}}
   return [h,cont,temp,hum,mm,land,bad,canyon,lava,volc,lk,lakeK];
@@ -131,30 +142,77 @@ function sample2(x,z){
   if(mg>0.3&&land>0.7&&!lava&&volc<0.2&&h>=WATER+1&&!wet&&!wl&&bad<0.3){fan=temp<-0.15?21:(temp>0.18&&hum<0.05)?18:hum>0.12?19:20;
     if(fan===18||fan===21){const cs=7,gx=Math.floor(x/cs),gz=Math.floor(z/cs),rr=hash(gx,gz,951);if(rr<0.3){const px=(gx+0.25+hash(gx,gz,952)*0.5)*cs,pz=(gz+0.25+hash(gx,gz,953)*0.5)*cs,dd=Math.hypot(x-px,z-pz),rad=1.2+rr*3.5;if(dd<rad){const tall=(4+rr*48)*(1-dd/rad)*sstep(0.3,0.42,mg);h+=tall;if(tall>2)spire=1}}}
     if(fan===20)h-=sstep(0.3,0.5,mg)*2}
+  // ===== v103: nowe biomy (regiony wg szumu rn + klimat), z własną rzeźbą terenu =====
+  let nb=0;{const rn=fbm(x/900+1777,z/900-2333,2),rn2=fbm(x/2400+33,z/2400-71,2),dry=!wet&&!wl&&!lava&&volc<0.25&&!fan&&bad<0.3;
+    if(dry&&h>=WATER){
+      if(rn2>0.58&&land>0.8&&mm<0.4){nb=48;const sp=hash(Math.floor(x/5),Math.floor(z/5),977);if(sp<0.06)h+=6+sp*120;h-=sstep(0.58,0.7,rn2)*3}            // otchłań
+      else if(temp<-0.24&&rn>0.18){nb=47;const cr=Math.abs(fbm(x/70+13,z/70-29,2));if(cr<0.035&&h>WATER+3)h-=7*(1-cr/0.035);h+=sstep(0.18,0.4,rn)*4}   // lodowiec ze szczelinami
+      else if(temp<-0.06&&cont>0.02&&cont<0.3&&rn<-0.15){nb=44;h+=sstep(0.02,0.1,cont)*sstep(-0.15,-0.3,rn)*20;const fj=Math.abs(fbm(x/230+71,z/230+19,2));if(fj<0.05&&cont<0.24)h=Math.min(h,WATER-3-Math.round((1-fj/0.05)*4))}   // fiordy: klify i wąskie zatoki
+      else if(temp>-0.05&&hum>0.06&&cont>0.0&&cont<0.2&&rn>0.25&&h<WATER+7){nb=43;const ch=Math.abs(fbm(x/75+301,z/75-97,2));h=ch<0.07?WATER-1-Math.round((1-ch/0.07)*2):WATER+1}   // delta rzeki: kanały i wysepki
+      else if(temp>0.22&&hum<0.02&&rn<-0.22){nb=46;const o=fbm(x/110+5,z/110-7,2);if(o>0.4){const lvl=Math.floor(h)-1;if(o>0.47){wl=lvl;h=lvl-1-Math.round(sstep(0.47,0.6,o)*2)}else h=lvl+1}}   // oazy na pustyni
+      else if(temp>-0.1&&temp<0.22&&hum<0.12&&rn>0.38&&mm<0.45){nb=40;const g=Math.abs(fbm(x/380+911+fbm(x/120,z/120,1)*0.4,z/380-61,2));if(g<0.055){const k=1-g/0.055;h=h-(h-(WATER+1))*Math.min(1,k*2.6)}else if(g<0.085)h+=2}   // wielki wąwóz
+      else if(temp>-0.05&&hum<0.1&&rn<-0.38){nb=41;const gp=fbm(x/40+77,z/40-55,2);if(gp>0.5){const lvl=Math.floor(h);wl=lvl;h=lvl-2}}   // gorące źródła i gejzery
+      else if(temp>-0.18&&temp<0.12&&hum>0.0&&hum<0.24&&rn<-0.28)nb=42;   // martwy las
+      else if(temp>-0.08&&temp<0.22&&hum>-0.15&&hum<0.1&&rn>0.2&&mm<0.35)nb=45;   // żniwne pola
+      else if(hum>-0.06&&hum<0.26&&temp>-0.12&&temp<0.2&&rn<-0.12)nb=39;   // podniebne łąki (pływające wyspy)
+    }
+    // ===== v105: kolejne biomy (osobny szum regionów rn3) =====
+    if(!nb&&dry&&h>=WATER){const rn3=fbm(x/1000-555,z/1000+888,2);
+      if(rn3>0.42){if(temp>0.18&&hum<0.06){nb=49;const m=fbm(x/150+41,z/150-17,2);if(m>0.18)h+=sstep(0.18,0.23,m)*9+sstep(0.3,0.34,m)*6}   // czerwone wydmy z mesami
+        else if(temp>-0.08&&temp<0.22&&hum>0.08)nb=51}   // bursztynowy las
+      else if(rn3>0.3){if(temp>-0.12&&temp<0.16&&hum>0.06)nb=56;   // krwawy las
+        else if(temp>-0.12&&temp<0.22&&hum>-0.14&&hum<0.12)nb=54}   // ogród olbrzymich kwiatów
+      else if(rn3<-0.4){if(hum>0.12&&temp>0.02){nb=52;const gx2=Math.floor(x/16),gz2=Math.floor(z/16),hh=hash(gx2,gz2,733);if(hh<0.55){const px=(gx2+0.25+hash(gx2,gz2,734)*0.5)*16,pz=(gz2+0.25+hash(gx2,gz2,735)*0.5)*16,d=Math.hypot(x-px,z-pz),R=2.6+hh*3;if(d<R)h+=(16+hh*26)*Math.min(1,(R-d)*1.4);else if(d<R+2)h+=1.2}}   // skalny las (krasowe iglice)
+        else if(hum<0.1&&temp>-0.2){nb=50;const gx2=Math.floor(x/80),gz2=Math.floor(z/80),hh=hash(gx2,gz2,741);if(hh<0.7){const px=(gx2+0.3+hash(gx2,gz2,742)*0.4)*80,pz=(gz2+0.3+hash(gx2,gz2,743)*0.4)*80,R=12+hh*22,d=Math.hypot(x-px,z-pz);if(d<R)h-=(1-(d/R)*(d/R))*R*0.32;else if(d<R*1.3)h+=Math.sin((d-R)/(R*0.3)*Math.PI)*R*0.08}}}   // pole kraterów
+      else if(rn3<-0.25){if(cont>0.0&&cont<0.12&&temp>-0.15){nb=55;const cx2=Math.floor(x/2.2+((Math.floor(z/2.2))%2)*0.5);h=Math.max(WATER+1,Math.floor(h*0.6+(WATER+1)*0.4)+Math.floor(hash(cx2,Math.floor(z/2.2),751)*3))}   // bazaltowe wybrzeże z kolumnami
+        else if(hum>0.2&&temp>-0.1){nb=53;if(h<WATER+16){const pu=fbm(x/30+9,z/30-3,2);h=WATER+1+Math.max(0,(h-WATER-1)*0.2);if(pu>0.25&&h<WATER+3){wl=Math.floor(h)+1;h=Math.floor(h)-1}}}}   // świecące bagno
+    }
+    // ===== v113: 12 kolejnych biomów (szum regionów rn4) =====
+    if(!nb&&dry&&h>=WATER){const rn4=fbm(x/1100+4242,z/1100-1717,2);
+      if(rn4>0.48){if(temp<-0.1)nb=64;   // szronowy las
+        else if(temp>0.18&&hum<0.02){nb=65;h=WATER+1+Math.max(0,(h-WATER-1)*0.15);const cr=Math.abs(fbm(x/26+3,z/26-9,2));if(cr<0.02)h-=1}   // wyschnięte morze: płaskie dno ze spękaniami
+        else if(hum>0.08)nb=63;   // las latarni
+        else{nb=57;const cw=fbm(x/90+17,z/90-41,2);if(cw>0.3)h-=sstep(0.3,0.42,cw)*4}}   // cmentarzysko tytanów: zapadliska
+      else if(rn4>0.38){if(hum>0.14&&temp>-0.12)nb=66;   // las pajęczyn
+        else if(temp>0.08&&hum<0.06){nb=59;h=WATER+1;const fm=fbm(x/45+71,z/45-13,2);if(fm>0.22){wl=WATER+2}}   // solne lustro: płaska sól z cienką taflą wody
+        else nb=58}   // skamieniała puszcza
+      else if(rn4<-0.48){if(temp<0.12){nb=60;const base=WATER+16,sp=fbm(x/70+501,z/70-77,2);h=base+Math.max(0,(h-WATER)*0.15);if(sp>0.22)h+=Math.pow(sstep(0.22,0.55,sp),1.4)*70}   // morze chmur: płaski „chmurny” poziom z wyrastającymi turniami
+        else{nb=61;const rg=1-Math.abs(fbm(x/170+91,z/170-33,2))*2.2;h+=Math.max(0,rg)*Math.max(0,rg)*34;h=Math.floor(h/2)*2}}   // tęczowe góry: grzbiety w tarasy
+      else if(rn4<-0.38){if(hum>0.18){nb=62;h=WATER+1+Math.max(0,(h-WATER-1)*0.2);const pu=fbm(x/22+5,z/22-8,2);if(pu>0.2)h-=1}   // smołowe bagno
+        else if(hum>0.05&&temp>-0.1){nb=67;h+=Math.abs(fbm(x/120+7,z/120+3,2))*24;h=WATER+1+Math.floor((h-WATER-1)/3)*3;const pd=fbm(x/14+1,z/14-2,2);if(pd>0.15&&h<WATER+40)wl=Math.floor(h)+1}   // kaskadowe tarasy z poletkami wody
+        else nb=68}   // mechaniczne pustkowie
+    }}
   h=Math.max(1,Math.min(MAXH-1,Math.floor(h)));
-  let b;
+  let b;const sub=fbm(x/640+211,z/640-97,2),sub2=fbm(x/700-55,z/700+131,2);
   if(wl&&h>=wl)wl=0;
   if(lava) b=17;
-  else if(h<WATER) b=wet||0;
+  else if(nb&&h>=WATER&&!(wl&&h<wl)) b=nb;
+  else if(h<WATER) b=wet||((!wet&&temp>0.14&&h>=WATER-7&&cont<0.24&&fbm(x/300+41,z/300-9,2)>-0.05)?37:0);   // rafa koralowa: płytkie, ciepłe morze
   else if(wl) b=13;
   else if(volc>0.35&&h>WATER+6) b=16;
   else if(spire) b=fan===18?22:23;
   else if(fan&&h>WATER+1) b=fan;
+  else if(h<=WATER+2&&cont<0.25&&temp>0.12&&hum>0.14&&!wet) b=30;   // namorzyny: ciepłe, wilgotne wybrzeże
   else if(wet&&h<=WATER+1) b=1;
   else if(h<=WATER+1&&cont<0.2) b=1;
   else if(bad>0.42||canyon>0.25) b=15;
   else if(gorge>0.3&&h>WATER+3) b=15;
   else if(mm>0.5&&h>WATER+22) b=6;
-  else if(temp>0.22&&hum<0.02) b=4;
-  else if(temp<-0.24) b=5;
-  else if(hum>0.32&&h<WATER+5) b=7;
-  else if(temp>0.2&&hum>0.26) b=9;
-  else if(temp>0.12&&hum<0.16) b=8;
-  else if(hum>0.08){const sk=fbm(x/520+71,z/520-33,2);b=sk>0.38?11:(temp<-0.06?10:3)}
+  else if(temp>0.22&&hum<0.02){const k=sstep(0.16,0.3,sub);if(k>0.5){b=28;h=Math.round(h+(Math.max(WATER+2,Math.min(h,WATER+5))-h)*k)}else b=sub2>0.26?35:4}   // szklana pustynia   // solnisko: płaska biel w środku pustyni
+  else if(temp<-0.24) b=sub2>0.22?32:5;   // zorzowa tundra
+  else if(hum>0.32&&h<WATER+5) b=(temp<0.1&&sub>-0.12)?33:7;   // torfowisko we mgle
+  else if(temp>0.2&&hum>0.26) b=sub>0.18?26:9;   // bambusowy gaj w dżungli
+  else if(temp>0.12&&hum<0.16) b=sub2>0.2?31:8;   // sawanna baobabów
+  else if(temp<-0.08&&hum>0.18&&h<WATER+9) b=33;   // torfowisko: zimne, mokre niziny
+  else if(temp<-0.15&&hum>0.06) b=24;   // tajga: zimny, wilgotny las iglasty
+  else if(hum>0.16&&temp>-0.06&&temp<0.14&&sub2>0.18) b=27;   // las sekwoi
+  else if(hum>0.08){const sk=fbm(x/520+71,z/520-33,2);b=sk>0.34?(sub2>-0.02?34:11):(temp<-0.06?10:3)}   // wiśniowy sad
   else if(temp<-0.1) b=12;
-  else b=2;
+  else if(hum<-0.14&&temp>-0.05) b=sub2>0.24?36:25;   // step / skamieniały las
+  else b=fbm(x/900-313,z/900+77,2)>0.4?38:(sub>0.2&&temp>-0.06)?29:2;   // pole dawnej bitwy / lawendowe pola
   return [h,b,wl];
 }
+const RAINB=[[0.86,0.38,0.30],[0.90,0.56,0.32],[0.92,0.76,0.40],[0.86,0.82,0.62],[0.42,0.66,0.52],[0.56,0.48,0.78]];
 const STRATA=[[0.80,0.46,0.26],[0.70,0.36,0.20],[0.88,0.62,0.40],[0.62,0.30,0.18],[0.84,0.54,0.32],[0.92,0.74,0.52]];
 // ===== królestwa ras (nowe światy) =====
 const KR=2200,kcache=new Map();
@@ -167,8 +225,8 @@ function kingdomCell(gx,gz){const key=SEED+':'+gx+','+gz;if(kcache.has(key))retu
   const r={id:'K'+gx+'_'+gz,gx,gz,x,z,race,name:nm};kcache.set(key,r);return r}
 function kingdomAt(x,z){const [wx,wz]=kwarp(x,z),gx=Math.floor(wx/KR),gz=Math.floor(wz/KR);let best=null,bd=1e18;for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){const k=kingdomCell(gx+dx,gz+dz),dd=(k.x-wx)**2+(k.z-wz)**2;if(dd<bd){bd=dd;best=k}}return best}
 // paleta Pintara: trawa #54843a, ziemia #806844, piasek [216,198,142], kamień #8e8994, ściany klifów brąz [.42,.29,.18]
-const TOP=[[0.74,0.64,0.40],[0.92,0.80,0.50],[0.27,0.60,0.14],[0.20,0.50,0.10],[0.92,0.76,0.42],[0.92,0.95,0.98],[0.56,0.53,0.6],[0.30,0.45,0.13],[0.70,0.64,0.30],[0.12,0.46,0.12],[0.50,0.48,0.18],[0.36,0.62,0.24],[0.46,0.38,0.40],[0.58,0.52,0.36],[0.50,0.46,0.32],[0.80,0.48,0.27],[0.20,0.18,0.19],[1.0,0.45,0.08],[0.74,0.70,0.88],[0.30,0.52,0.50],[0.27,0.25,0.27],[0.82,0.92,0.98],[0.55,0.95,1.0],[0.9,0.97,1.0]];
-const TOPSIDE=[[0.62,0.52,0.32],[0.72,0.58,0.32],[0.48,0.30,0.15],[0.46,0.29,0.14],[0.72,0.56,0.30],[0.46,0.30,0.16],[0.435,0.416,0.451],[0.40,0.28,0.15],[0.62,0.46,0.26],[0.40,0.27,0.14],[0.46,0.30,0.15],[0.46,0.30,0.15],[0.40,0.30,0.22],[0.50,0.42,0.28],[0.44,0.38,0.26],[0.72,0.38,0.22],[0.15,0.13,0.14],[0.9,0.3,0.05],[0.58,0.52,0.72],[0.30,0.24,0.28],[0.2,0.17,0.19],[0.62,0.78,0.9],[0.75,0.55,1.0],[0.7,0.88,1.0]];
+const TOP=[[0.74,0.64,0.40],[0.92,0.80,0.50],[0.27,0.60,0.14],[0.20,0.50,0.10],[0.92,0.76,0.42],[0.92,0.95,0.98],[0.56,0.53,0.6],[0.30,0.45,0.13],[0.70,0.64,0.30],[0.12,0.46,0.12],[0.50,0.48,0.18],[0.36,0.62,0.24],[0.46,0.38,0.40],[0.58,0.52,0.36],[0.50,0.46,0.32],[0.80,0.48,0.27],[0.20,0.18,0.19],[1.0,0.45,0.08],[0.74,0.70,0.88],[0.30,0.52,0.50],[0.27,0.25,0.27],[0.82,0.92,0.98],[0.55,0.95,1.0],[0.9,0.97,1.0],[0.20,0.38,0.22],[0.70,0.64,0.32],[0.42,0.62,0.18],[0.18,0.34,0.14],[0.95,0.95,0.92],[0.38,0.56,0.22],[0.30,0.40,0.20],[0.78,0.66,0.38],[0.86,0.92,0.96],[0.30,0.33,0.17],[0.46,0.68,0.32],[0.62,0.80,0.78],[0.60,0.56,0.50],[0.84,0.76,0.52],[0.44,0.42,0.27],[0.40,0.70,0.26],[0.62,0.50,0.30],[0.82,0.74,0.56],[0.36,0.34,0.30],[0.34,0.56,0.20],[0.30,0.42,0.24],[0.80,0.66,0.30],[0.94,0.80,0.52],[0.72,0.87,0.96],[0.20,0.11,0.26],[0.78,0.36,0.22],[0.42,0.40,0.38],[0.62,0.52,0.24],[0.36,0.56,0.30],[0.16,0.26,0.24],[0.46,0.72,0.34],[0.22,0.22,0.24],[0.42,0.20,0.18],[0.52,0.50,0.42],[0.58,0.58,0.60],[0.96,0.96,0.94],[0.95,0.96,0.98],[0.86,0.52,0.34],[0.16,0.15,0.14],[0.26,0.42,0.22],[0.82,0.90,0.96],[0.80,0.74,0.60],[0.30,0.32,0.26],[0.44,0.66,0.26],[0.52,0.32,0.20]];
+const TOPSIDE=[[0.62,0.52,0.32],[0.72,0.58,0.32],[0.48,0.30,0.15],[0.46,0.29,0.14],[0.72,0.56,0.30],[0.46,0.30,0.16],[0.435,0.416,0.451],[0.40,0.28,0.15],[0.62,0.46,0.26],[0.40,0.27,0.14],[0.46,0.30,0.15],[0.46,0.30,0.15],[0.40,0.30,0.22],[0.50,0.42,0.28],[0.44,0.38,0.26],[0.72,0.38,0.22],[0.15,0.13,0.14],[0.9,0.3,0.05],[0.58,0.52,0.72],[0.30,0.24,0.28],[0.2,0.17,0.19],[0.62,0.78,0.9],[0.75,0.55,1.0],[0.7,0.88,1.0],[0.36,0.27,0.16],[0.58,0.44,0.26],[0.46,0.34,0.18],[0.40,0.24,0.14],[0.84,0.82,0.78],[0.46,0.32,0.18],[0.30,0.24,0.16],[0.70,0.48,0.28],[0.46,0.30,0.16],[0.30,0.22,0.14],[0.48,0.30,0.15],[0.70,0.62,0.48],[0.50,0.46,0.42],[0.72,0.58,0.32],[0.40,0.32,0.20],[0.46,0.30,0.15],[0.58,0.34,0.20],[0.70,0.55,0.38],[0.28,0.24,0.20],[0.40,0.30,0.18],[0.42,0.40,0.44],[0.50,0.36,0.20],[0.76,0.60,0.36],[0.52,0.72,0.90],[0.11,0.05,0.15],[0.66,0.30,0.18],[0.32,0.30,0.30],[0.42,0.30,0.16],[0.56,0.56,0.52],[0.14,0.18,0.16],[0.42,0.30,0.18],[0.18,0.18,0.20],[0.30,0.16,0.14],[0.42,0.38,0.32],[0.46,0.45,0.47],[0.86,0.86,0.84],[0.80,0.82,0.86],[0.70,0.40,0.28],[0.12,0.11,0.10],[0.36,0.26,0.16],[0.60,0.66,0.72],[0.66,0.60,0.48],[0.28,0.24,0.20],[0.46,0.34,0.20],[0.40,0.26,0.18]];
 const DIRT=TOPSIDE;
 const STONE=[0.435,0.416,0.451];
 const DIRTTOP=[0.502,0.408,0.267],ROADC=[0.6,0.47,0.3],ROADC2=[0.54,0.42,0.27],COBC=[0.56,0.54,0.52],COBC2=[0.47,0.45,0.44];
@@ -180,10 +238,12 @@ function build(cx,cz,lod,sx,sz,dig){
   const WLm=new Uint8Array(W*W);
   for(let z=0;z<W;z++)for(let x=0;x<W;x++){const r=sample(ox+x,oz+z);H[z*W+x]=r[0];BI[z*W+x]=r[1];WLm[z*W+x]=r[2]||0}
   const RD=new Uint8Array(W*W);
-  if(sx!=null){const mx=cx*C+16,mz=cz*C+16,cty=cityNear(mx,mz,sx,sz,30);
-    if(cty)for(let z=0;z<W;z++)for(let x=0;x<W;x++){const dx=ox+x+0.5-cty.x,dz=oz+z+0.5-cty.z;if(Math.abs(dx)<=cty.Hs+4&&Math.abs(dz)<=cty.Hs+4){H[z*W+x]=cty.h;WLm[z*W+x]=0;
-      const ax=Math.abs(dx),az=Math.abs(dz),sec=v=>(v>=23&&v<=27)||(v>=46&&v<=50&&v<cty.Hs-7);if(ax<cty.Hs+0.5&&az<cty.Hs+0.5&&(ax<3.2||az<3.2||(ax<12&&az<12)||sec(ax)||sec(az)||ax>cty.Hs-6||az>cty.Hs-6))RD[z*W+x]=2}
-      else if((Math.abs(dx)<3.2&&Math.abs(dz)<cty.Hs+9)||(Math.abs(dz)<3.2&&Math.abs(dx)<cty.Hs+9))RD[z*W+x]=2}
+  if(sx!=null){const mx=cx*C+16,mz=cz*C+16,cty=cityNear(mx,mz,sx,sz,62);
+    if(cty){const pl=cityPlan(cty),BB=cty.Hs*1.18+2,TL=cty.lv?cty.lv[cty.lv.length-1]:0;for(let z=0;z<W;z++)for(let x=0;x<W;x++){const dx=ox+x+0.5-cty.x,dz=oz+z+0.5-cty.z;if(Math.abs(dx)>BB||Math.abs(dz)>BB)continue;const p=pl.rho(dx,dz);
+      /* wnętrze murów: tarasy + ulice z planu; tuż za murem płasko, dalej łagodne przejście w naturalny teren */
+      if(p<1.06){WLm[z*W+x]=0;const sk=p<0.99?pl.streetAt(dx,dz):0;if(sk)RD[z*W+x]=2;H[z*W+x]=cty.h+(p<0.99?pl.lvlAt(dx,dz,sk>0):TL)}
+      else if(p<1.17){const t=(p-1.06)/0.11,sm=t*t*(3-2*t);H[z*W+x]=Math.round((cty.h+TL)*(1-sm)+H[z*W+x]*sm)}
+      if(p>=0.97&&((Math.abs(dx)<3.2&&Math.abs(dz)<BB+8)||(Math.abs(dz)<3.2&&Math.abs(dx)<BB+8)))RD[z*W+x]=2}}
     const rs=roadsNear(mx,mz,40,sx,sz);
     for(const r of rs)for(let i=0;i<r.pts.length-1;i++){const a=r.pts[i],b=r.pts[i+1];
       const x0=Math.max(0,Math.floor(Math.min(a[0],b[0])-2-ox)),x1=Math.min(W-1,Math.ceil(Math.max(a[0],b[0])+2-ox)),z0=Math.max(0,Math.floor(Math.min(a[1],b[1])-2-oz)),z1=Math.min(W-1,Math.ceil(Math.max(a[1],b[1])+2-oz));
@@ -238,13 +298,24 @@ function build(cx,cz,lod,sx,sz,dig){
   }
   const SLB=[];
   // półstopnie: przy uskoku o 1 blok dokłada się płytka 0,5 m (łagodniejsze zbocza w stylu voxel)
-  function slab(d,lx,lz,y0,cT,cS){let x0,x1,z0,z1;if(d===0){x0=lx+1;x1=lx+1.5;z0=lz;z1=lz+1}else if(d===1){x0=lx-0.5;x1=lx;z0=lz;z1=lz+1}else if(d===2){z0=lz+1;z1=lz+1.5;x0=lx;x1=lx+1}else{z0=lz-0.5;z1=lz;x0=lx;x1=lx+1}const y1=y0+0.5;
+  // półstopień na niższym polu przy uskoku o 1 blok. Pole pamięta zajęte ćwiartki: w narożniku drugi półstopień zajmuje tylko wolną ćwiartkę,
+  // bo nakładające się górne ściany na tej samej wysokości migotały (z-fighting).
+  const SLQ=new Map();
+  function slabBox(d,x0,x1,z0,z1,y0,cT,cS){const y1=y0+0.5;
     quad([x0,y1,z0, x0,y1,z1, x1,y1,z1, x1,y1,z0],[0,1,0],[cT,cT,cT,cT]);
     if(d!==1)quad([x1,y0,z1, x1,y0,z0, x1,y1,z0, x1,y1,z1],[1,0,0],[cS,cS,cT,cT]);
     if(d!==0)quad([x0,y0,z0, x0,y0,z1, x0,y1,z1, x0,y1,z0],[-1,0,0],[cS,cS,cT,cT]);
     if(d!==3)quad([x0,y0,z1, x1,y0,z1, x1,y1,z1, x0,y1,z1],[0,0,1],[cS,cS,cT,cT]);
     if(d!==2)quad([x1,y0,z0, x0,y0,z0, x0,y1,z0, x1,y1,z0],[0,0,-1],[cS,cS,cT,cT]);
     SLB.push(wx0+x0,wz0+z0,wx0+x1,wz0+z1,y0,y1)}
+  function slab(d,lx,lz,y0,cT,cS){let x0,x1,z0,z1,cx,cz;if(d===0){x0=lx+1;x1=lx+1.5;z0=lz;z1=lz+1;cx=lx+1;cz=lz}else if(d===1){x0=lx-0.5;x1=lx;z0=lz;z1=lz+1;cx=lx-1;cz=lz}else if(d===2){z0=lz+1;z1=lz+1.5;x0=lx;x1=lx+1;cx=lx;cz=lz+1}else{z0=lz-0.5;z1=lz;x0=lx;x1=lx+1;cx=lx;cz=lz-1}
+    const k=cx+','+cz,m=SLQ.get(k)||0,q=(x,z)=>1<<(((x-cx)>=0.5?1:0)+((z-cz)>=0.5?2:0));
+    // ćwiartki pasa: podział wzdłuż dłuższego boku
+    const parts=(x1-x0)>(z1-z0)?[[x0,x0+0.5,z0,z1],[x0+0.5,x1,z0,z1]]:[[x0,x1,z0,z0+0.5],[x0,x1,z0+0.5,z1]];
+    const free=parts.filter(([a,b,c,e])=>!(m&q(a,c)));if(!free.length)return;
+    let nm=m;for(const [a,b,c,e] of free)nm|=q(a,c);SLQ.set(k,nm);
+    if(free.length===2){slabBox(d,x0,x1,z0,z1,y0,cT,cS);return}
+    const [a,b,c,e]=free[0];slabBox(d,a,b,c,e,y0,cT,cS)}
   const D=[[1,0],[-1,0],[0,1],[0,-1]];
   for(let lz=0;lz<C;lz+=s)for(let lx=0;lx<C;lx+=s){
     const h=hAt(lx,lz), b=bAt(lx,lz), v=0.92+hash(wx0+lx,wz0+lz,7)*0.16;
@@ -257,7 +328,22 @@ function build(cx,cz,lod,sx,sz,dig){
     if(b===2||b===3||b===7){const pn=fbm((wx0+lx)/46,(wz0+lz)/46,2);if(pn>0.28)top=b===3?[0.24,0.55,0.12]:[0.40,0.66,0.18];else if(pn<-0.3)top=b===3?[0.16,0.42,0.09]:[0.22,0.52,0.12];
       if(fbm((wx0+lx)/14+9,(wz0+lz)/14,1)>0.55&&b===2)top=[0.58,0.66,0.22];}
     if(b>=8){const pn=fbm((wx0+lx)/30,(wz0+lz)/30,2);if(b===8&&pn>0.2)top=[0.80,0.72,0.40];if(b===8&&pn<-0.35)top=[0.52,0.56,0.24];if(b===10&&pn>0.15)top=hash(wx0+lx,wz0+lz,46)<0.5?[0.74,0.42,0.16]:[0.66,0.30,0.12];
-      if(b===11&&pn>0.35)top=[0.92,0.70,0.78];if(b===12&&pn>0.0)top=[0.52,0.32,0.55];if(b===9&&pn>0.25)top=[0.18,0.40,0.10]}
+      if(b===28&&pn>0.2)top=[0.88,0.88,0.86];if(b===28&&pn<-0.35)top=[0.98,0.97,0.94];if(b===29&&pn>0.2)top=[0.46,0.58,0.26];if(b===30&&pn>0.1)top=[0.34,0.32,0.18];if(b===26&&pn>0.25)top=[0.52,0.68,0.24];if(b===27&&pn>0.2)top=[0.26,0.40,0.16];if(b===31&&pn>0.2)top=[0.84,0.70,0.40];
+      if(b===32&&pn>0.2)top=[0.78,0.88,0.94];if(b===33&&pn>0.15)top=[0.40,0.30,0.20];if(b===33&&pn<-0.3)top=[0.36,0.42,0.20];if(b===34&&pn>0.3)top=[0.94,0.74,0.82];if(b===35){top=pn>0.25?[0.74,0.90,0.88]:pn<-0.25?[0.52,0.70,0.70]:top;if(hash(wx0+lx,wz0+lz,93)<0.02)top=[0.92,0.98,1]}if(b===36&&pn>0.2)top=[0.70,0.62,0.48];if(b===38&&pn>0.2)top=[0.36,0.30,0.20];if(b===38&&pn<-0.3)top=[0.52,0.54,0.30];if(b===25&&pn>0.15)top=[0.80,0.70,0.36];if(b===25&&pn<-0.3)top=[0.54,0.58,0.28];if(b===24&&pn>0.25)top=[0.30,0.42,0.22];
+      if(b===11&&pn>0.35)top=[0.92,0.70,0.78];const hq=hash(wx0+lx,wz0+lz,97);if(b===39){if(pn>0.3)top=[0.48,0.78,0.30];if(hq<0.03)top=hq<0.015?[0.95,0.85,0.40]:[0.85,0.55,0.85]}if(b===40&&pn>0.25)top=[0.70,0.46,0.28];if(b===41){top=pn>0.3?[0.92,0.58,0.22]:pn<-0.3?[0.36,0.66,0.66]:pn>0.1?[0.95,0.92,0.84]:top}if(b===42){if(pn>0.2)top=[0.46,0.44,0.40];else if(pn<-0.3)top=[0.26,0.24,0.22]}if(b===43&&pn>0.2)top=[0.42,0.40,0.24];if(b===44&&pn>0.25)top=[0.48,0.46,0.50];if(b===45){const row=((wx0+lx+(wz0+lz)*0.12)%6+6)%6;top=pn<-0.3?[0.52,0.60,0.26]:row<3?[0.86,0.72,0.32]:[0.62,0.46,0.24]}if(b===46&&pn>0.3)top=[0.98,0.86,0.58];if(b===47){if(pn>0.25)top=[0.94,0.97,1.0];else if(pn<-0.3)top=[0.56,0.76,0.92]}if(b===48){if(pn>0.25)top=[0.30,0.14,0.40];if(hq<0.025)top=[0.72,0.36,1.0]}if(b===49){top=pn>0.3?[0.86,0.46,0.28]:pn<-0.3?[0.66,0.28,0.18]:top}if(b===50){if(pn>0.3)top=[0.52,0.50,0.46];if(hq<0.012)top=[1.0,0.55,0.2]}if(b===51){if(pn>0.2)top=[0.78,0.58,0.22];if(hq<0.03)top=[0.95,0.70,0.25]}if(b===52&&pn>0.3)top=[0.30,0.48,0.26];if(b===53){if(pn>0.25)top=[0.12,0.20,0.20];if(hq<0.04)top=hq<0.02?[0.3,0.95,0.9]:[0.5,0.6,1.0]}if(b===54){if(pn>0.3)top=[0.52,0.80,0.38];if(hq<0.07)top=[[0.95,0.4,0.5],[0.98,0.85,0.3],[0.7,0.5,0.95],[1,1,1]][Math.floor(hq*57)%4]}if(b===55){const hx2=((wx0+lx)%3+3)%3,hz2=((wz0+lz)%3+3)%3;if(hx2===0||hz2===0)top=[0.16,0.16,0.18]}if(b===56){if(pn>0.25)top=[0.55,0.16,0.14];else if(pn<-0.3)top=[0.30,0.14,0.12]}if(b===12&&pn>0.0)top=[0.52,0.32,0.55];if(b===9&&pn>0.25)top=[0.18,0.40,0.10]}
+    if(b>=57){const pn=fbm((wx0+lx)/28,(wz0+lz)/28,2),hq=hash(wx0+lx,wz0+lz,98);
+      if(b===57){if(pn>0.25)top=[0.60,0.56,0.46];else if(pn<-0.3)top=[0.42,0.40,0.36];if(hq<0.01)top=[0.86,0.82,0.72]}
+      if(b===58){if(pn>0.2)top=[0.44,0.52,0.40];if(hq<0.02)top=[0.70,0.88,0.92]}
+      if(b===59){if(pn>0.15)top=[0.92,0.90,0.88];if(Math.abs(fbm((wx0+lx)/9,(wz0+lz)/9,1))<0.03)top=[0.84,0.82,0.80]}
+      if(b===60){if(pn>0.2)top=[0.88,0.90,0.94];else if(pn<-0.25)top=[1,1,1];if(h>WATER+22)top=pn>0?[0.56,0.56,0.6]:[0.46,0.6,0.36]}
+      if(b===61){const RB=[[0.86,0.38,0.30],[0.90,0.56,0.32],[0.92,0.76,0.40],[0.86,0.82,0.62],[0.42,0.66,0.52],[0.56,0.48,0.78]];top=RB[((h>>1)+6)%6]}
+      if(b===62){if(pn>0.15)top=[0.08,0.07,0.07];else if(pn<-0.3)top=[0.28,0.26,0.18];if(hq<0.01)top=[0.22,0.20,0.16]}
+      if(b===63){if(pn>0.25)top=[0.20,0.36,0.18];if(hq<0.012)top=[0.95,0.80,0.40]}
+      if(b===64){if(pn>0.2)top=[0.92,0.96,1];else if(pn<-0.3)top=[0.66,0.76,0.82]}
+      if(b===65){if(pn>0.2)top=[0.86,0.80,0.66];const cr=Math.abs(fbm((wx0+lx)/7+3,(wz0+lz)/7-9,1));if(cr<0.04)top=[0.52,0.46,0.36];if(hq<0.006)top=[0.94,0.92,0.88]}
+      if(b===66){if(pn>0.2)top=[0.24,0.26,0.22];if(hq<0.04)top=[0.86,0.84,0.88]}
+      if(b===67){if(pn>0.2)top=[0.52,0.74,0.30];else if(pn<-0.3)top=[0.36,0.56,0.22]}
+      if(b===68){if(pn>0.2)top=[0.62,0.38,0.22];else if(pn<-0.3)top=[0.34,0.34,0.36];if(hq<0.02)top=[0.24,0.22,0.22]}}
     if((b===2||b===3)&&hash(wx0+lx,wz0+lz,41)<0.08)top=DIRTTOP;
     {const sl=Math.max(Math.abs(hAt(lx+s,lz)-h),Math.abs(hAt(lx-s,lz)-h),Math.abs(hAt(lx,lz+s)-h),Math.abs(hAt(lx,lz-s)-h))/s;if(sl>=3&&b!==0&&b!==1&&b!==4&&h>WATER+3)top=snowy&&sl<5?SNOW:(hash(wx0+lx,wz0+lz,45)<0.5?STONE:[0.5,0.48,0.54]);}
     if(b===6&&!snowy&&h>=WATER+26&&h<WATER+32)top=[0.42,0.48,0.3];
@@ -275,7 +361,7 @@ function build(cx,cz,lod,sx,sz,dig){
       if(border) bot=Math.max(0,Math.min(nh,h)-(s>1?10:0)); else bot=nh;
       if(bot>=h)continue;
       if(s===1&&!border&&nh===h-1&&h>WATER+1&&!wAt(nx,nz)&&b!==0&&b!==13&&b!==14&&b!==16&&b!==17&&b!==15&&!fdAt(lx,lz)&&!rdAt(lx,lz)&&!fdAt(nx,nz)&&!rdAt(nx,nz)&&bAt(nx,nz)!==17&&hash(wx0+lx*3+d,wz0+lz*5,77)<0.85)slab(d,lx,lz,nh,sh(tc,0.95),snowy?sh(SNOW,0.9*v):sh(TOPSIDE[b],v));
-      if(b===15&&!(border&&s>1)){for(let y=bot;y<h;y++){const sc=STRATA[((y>>1)+((wx0>>5)&1))%STRATA.length];side(d,lx,lz,y,y+1,sh(sc,v*(y===h-1?1.05:0.96)),sh(sc,v*0.9),false)}continue}
+      if((b===15||b===61)&&!(border&&s>1)){for(let y=bot;y<h;y++){const SA=b===61?RAINB:STRATA,sc=SA[((y>>1)+(b===61?6:((wx0>>5)&1)))%SA.length];side(d,lx,lz,y,y+1,sh(sc,v*(y===h-1?1.05:0.96)),sh(sc,v*0.9),false)}continue}
       const ts=snowy?sh(SNOW,0.9*v):sh(TOPSIDE[b],v);
       const dirt=b===6?STONE:DIRT[b];
       const ins=border&&s>1;side(d,lx,lz,h-1,h,ts,ts,ins);
@@ -291,15 +377,17 @@ function build(cx,cz,lod,sx,sz,dig){
    const cd=(cx,cz)=>{let m=1,sum=0;for(const [a,b2] of [[0,0],[-s,0],[0,-s],[-s,-s]]){const d=dAt(cl(cx+a),cl(cz+b2));sum+=d;if(d<=0)m=0}return m?sum/4:0};
    const wq=(v,u)=>{const b0=WP.length/3;for(let k=0;k<4;k++){WP.push(v[k*3],v[k*3+1],v[k*3+2]);WU.push(u[k*2],u[k*2+1])}WI.push(b0,b0+1,b0+2,b0,b0+2,b0+3)};
    // wysokość wierzchołka tafli: średnia poziomów stykających się pól wody różniących się o ≤ RIVQ -> łagodne bystrza zamiast pionowych płatów
-   const vy=(vx,vz,w)=>{let sm=0,n=0;for(const [a,b2] of [[0,0],[-s,0],[0,-s],[-s,-s]]){const q=wAt(cl(vx+a),cl(vz+b2));if(q&&Math.abs(q-w)<=RIVQ){sm+=q;n++}}return(n?sm/n:w)-0.3};
+   const vy=(vx,vz,w)=>w-0.3;// płaska tafla na każdym tarasie (uśrednianie wierzchołków tworzyło złożone, ciemne trójkąty)
    for(let lz=0;lz<C;lz+=s)for(let lx=0;lx<C;lx+=s){const w=wAt(lx,lz);if(!w)continue;const y=w-0.3;
      wq([lx,vy(lx,lz,w),lz, lx,vy(lx,lz+s,w),lz+s, lx+s,vy(lx+s,lz+s,w),lz+s, lx+s,vy(lx+s,lz,w),lz],[0,cd(lx,lz), 0,cd(lx,lz+s), 0,cd(lx+s,lz+s), 0,cd(lx+s,lz)]);
-     for(let d=0;d<4;d++){const nx=lx+D[d][0]*s,nz=lz+D[d][1]*s,nw=wAt(cl(nx),cl(nz));if(nw>=w||(nw&&w-nw<=RIVQ))continue;const nh=hAt(cl(nx),cl(nz));if(!nw&&nh>=w)continue;
+     for(let d=0;d<4;d++){const nx=lx+D[d][0]*s,nz=lz+D[d][1]*s,nw=wAt(cl(nx),cl(nz));if(nw>=w)continue;const nh=hAt(cl(nx),cl(nz));if(!nw&&nh>=w)continue;
        const yb=nw?nw-0.3:(nh<WATER?WATER-0.3:nh);if(yb>=y-0.2)continue;const o=0.04;
-       if(d===0)wq([lx+s+o,yb,lz+s, lx+s+o,yb,lz, lx+s+o,y,lz, lx+s+o,y,lz+s],[1,yb,1,yb,1,y,1,y]);
-       else if(d===1)wq([lx-o,yb,lz, lx-o,yb,lz+s, lx-o,y,lz+s, lx-o,y,lz],[1,yb,1,yb,1,y,1,y]);
-       else if(d===2)wq([lx,yb,lz+s+o, lx+s,yb,lz+s+o, lx+s,y,lz+s+o, lx,y,lz+s+o],[1,yb,1,yb,1,y,1,y]);
-       else wq([lx+s,yb,lz-o, lx,yb,lz-o, lx,y,lz-o, lx+s,y,lz-o],[1,yb,1,yb,1,y,1,y]);
+       if(!nw&&nh>=WATER&&y-nh<2.5)continue;// brzeg z suchym, niższym terenem: bez „wiszącej” ściany wody
+       const H=1+(y-yb),U=[H,0,H,0,H,1,H,1];
+       if(d===0)wq([lx+s+o,yb,lz+s, lx+s+o,yb,lz, lx+s+o,y,lz, lx+s+o,y,lz+s],U);
+       else if(d===1)wq([lx-o,yb,lz, lx-o,yb,lz+s, lx-o,y,lz+s, lx-o,y,lz],U);
+       else if(d===2)wq([lx,yb,lz+s+o, lx+s,yb,lz+s+o, lx+s,y,lz+s+o, lx,y,lz+s+o],U);
+       else wq([lx+s,yb,lz-o, lx,yb,lz-o, lx,y,lz-o, lx+s,y,lz-o],U);
        if(s===1&&y-yb>1.2)FALLS.push(wx0+lx+0.5+D[d][0]*0.6,y,wz0+lz+0.5+D[d][1]*0.6,yb)}}}
   // dane pełnej rozdzielczości do kolizji
   const heights=new Uint8Array(C*C), biomes=new Uint8Array(C*C), wlev=new Uint8Array(C*C);
@@ -333,21 +421,74 @@ function build(cx,cz,lod,sx,sz,dig){
     else if(b===19){ if(r<0.03)t=11; else if(r<0.22)t=13; else if(r<0.3)t=11; else if(r<0.34)t=9; }
     else if(b===20){ if(r<0.08)t=19; else if(r<0.1)t=11; else if(r<0.115)t=5; }
     else if(b===21){ if(r<0.006)t=8; }
+    else if(b===24){ if(r<0.04)t=r2<0.6?1:8; else if(r<0.06)t=5; else if(r<0.2)t=9; else if(r<0.21)t=7; }
+    else if(b===25){ if(r<0.004)t=0; else if(r<0.01)t=5; else if(r<(mead?0.06:0.03))t=r2<0.5?7:10; else if(r<0.62)t=9; }
+    else if(b===26){ if(r<0.05)t=25; else if(r<0.2)t=13; else if(r<0.3)t=24; else if(r<0.31)t=5; }
+    else if(b===27){ if(r<0.006)t=26; else if(r<0.12)t=13; else if(r<0.14)t=11; else if(r<0.15)t=12; else if(r<0.2)t=9; }
+    else if(b===28){ if(r<0.012)t=29; else if(r<0.014)t=6; else if(r<0.0145)t=4; }
+    else if(b===29){ const row=((wx+wz*0.15)%4+4)%4;if(row<1.6&&r<0.75)t=28; else if(r<0.004)t=5; else if(r<0.2)t=9; else if(r<0.22)t=7; }
+    else if(b===30){ if(r<0.025)t=27; else if(r<0.2)t=31; else if(r<0.25)t=13; }
+    else if(b===31){ if(r<0.002)t=30; else if(r<0.01)t=5; else if(r<0.5)t=19; else if(r<0.52)t=6; }
+    else if(b===32){ if(r<0.03)t=18; else if(r<0.06)t=9; }
+    else if(b===33){ if(r<0.2)t=31; else if(r<0.26)t=13; else if(r<0.29)t=11; else if(r<0.295)t=51; }
+    else if(b===34){ if(r<0.06)t=10; else if(r<0.12)t=7; else if(r<0.32)t=9; }
+    else if(b===35){ if(r<0.03)t=52; else if(r<0.034)t=4; }
+    else if(b===36){ if(r<0.008)t=51; else if(r<0.12)t=19; }
+    else if(b===38){ if(r<0.012)t=49; else if(r<0.03)t=50; else if(r<0.046)t=51; else if(r<0.16)t=19; }
+    else if(b===39){ if(r<0.02)t=7; else if(r<0.035)t=10; else if(r<0.05)t=5; else if(r<0.42)t=9; else if(r<0.44)t=24; }
+    else if(b===40){ if(r<0.006)t=12; else if(r<0.02)t=6; else if(r<0.16)t=19; }
+    else if(b===41){ if(r<0.0015)t=55; else if(r<0.02)t=6; else if(r<0.08)t=19; }
+    else if(b===42){ if(r<0.02)t=65; else if(r<0.026)t=47; else if(r<0.03)t=51; else if(r<0.05)t=11; else if(r<0.18)t=19; }
+    else if(b===43){ if(r<0.12)t=31; else if(r<0.22)t=24; else if(r<0.26)t=13; else if(r<0.27)t=7; }
+    else if(b===44){ if(r<0.02)t=6; else if(r<0.026)t=12; else if(r<0.1)t=13; else if(r<0.22)t=9; }
+    else if(b===45){ const row=((wx+wz*0.12)%6+6)%6;if(row<3&&r<0.7)t=20; else if(r<0.012)t=56; else if(r<0.016)t=58; else if(r<0.0175)t=57; else if(r<0.2)t=9; }
+    else if(b===46){ if(r<0.004)t=4; else if(r<0.01)t=6; else if(r<0.04)t=19; }
+    else if(b===47){ if(r<0.004)t=46; else if(r<0.012)t=6; }
+    else if(b===48){ if(r<0.012)t=64; else if(r<0.016)t=47; else if(r<0.02)t=6; }
+    else if(b===49){ if(r<0.0015)t=75; else if(r<0.005)t=4; else if(r<0.012)t=6; else if(r<0.04)t=19; }
+    else if(b===50){ if(r<0.002)t=67; else if(r<0.02)t=6; else if(r<0.024)t=12; else if(r<0.05)t=19; }
+    else if(b===51){ if(r<0.03)t=13; else if(r<0.05)t=11; else if(r<0.06)t=7; else if(r<0.3)t=9; }
+    else if(b===52){ if(r<0.03)t=13; else if(r<0.06)t=6; else if(r<0.3)t=9; else if(r<0.34)t=25; }
+    else if(b===53){ if(r<0.025)t=70; else if(r<0.1)t=74; else if(r<0.16)t=31; else if(r<0.2)t=11; }
+    else if(b===54){ if(r<0.012)t=71; else if(r<0.024)t=72; else if(r<0.07)t=7; else if(r<0.1)t=10; else if(r<0.45)t=9; }
+    else if(b===55){ if(r<0.02)t=73; else if(r<0.03)t=6; else if(r<0.06)t=13; }
+    else if(b===56){ if(r<0.02)t=65; else if(r<0.03)t=11; else if(r<0.034)t=47; else if(r<0.2)t=24; }
+    else if(b===57){ if(r<0.006)t=34; else if(r<0.016)t=51; else if(r<0.02)t=6; else if(r<0.14)t=19; }
+    else if(b===58){ if(r<0.02)t=6; else if(r<0.026)t=12; else if(r<0.05)t=13; else if(r<0.14)t=9; }
+    else if(b===59){ if(r<0.008)t=29; else if(r<0.0105)t=79; else if(r<0.012)t=6; }
+    else if(b===60){ if(r<0.012)t=80; else if(r<0.02)t=6; }
+    else if(b===61){ if(r<0.004)t=81; else if(r<0.02)t=6; else if(r<0.08)t=19; }
+    else if(b===62){ if(r<0.012)t=82; else if(r<0.06)t=31; else if(r<0.07)t=65; else if(r<0.08)t=11; }
+    else if(b===63){ if(r<0.004)t=88; else if(r<0.05)t=13; else if(r<0.07)t=7; else if(r<0.09)t=11; else if(r<0.3)t=9; }
+    else if(b===64){ if(r<0.012)t=6; else if(r<0.02)t=59; else if(r<0.06)t=9; }
+    else if(b===65){ if(r<0.006)t=85; else if(r<0.012)t=6; else if(r<0.018)t=51; else if(r<0.0195)t=34; else if(r<0.03)t=19; }
+    else if(b===66){ if(r<0.012)t=87; else if(r<0.05)t=13; else if(r<0.07)t=11; else if(r<0.14)t=24; }
+    else if(b===67){ if(r<0.06)t=31; else if(r<0.064)t=88; else if(r<0.07)t=25; else if(r<0.2)t=9; }
+    else if(b===68){ if(r<0.004)t=90; else if(r<0.03)t=6; else if(r<0.04)t=12; else if(r<0.06)t=19; }
     else if(b===12){ if(r<0.08)t=18; else if(r<0.086)t=-1; else if(r<0.088)t=12; else if(r<0.09)t=2; else if(r<0.16)t=19; }
     if(t>=0&&TREES.has(t))t=-1;
     {const gc=8,gx=Math.floor(wx/gc),gz=Math.floor(wz/gc);if(wx-gx*gc===3+Math.floor(hash(gx,gz,61)*2)&&wz-gz*gc===3+Math.floor(hash(gx,gz,62)*2)&&hash(gx,gz,63)<(TP[b]||0))t=treeFor(b,h,hash(gx,gz,64))}
+    // nietypowe elementy biomów: jeden kandydat na kwadrat 44x44, tylko na płaskim terenie
+    let LMK=0;{const lg=44,lgx=Math.floor(wx/lg),lgz=Math.floor(wz/lg),L=LMB[b];if(L&&wx-lgx*lg===21&&wz-lgz*lg===21&&hash(lgx,lgz,91)<(LMP[b]||0.4)&&x>2&&z>2&&x<C-3&&z<C-3){let fl=true;for(const [ax,az] of [[-2,-2],[2,-2],[-2,2],[2,2],[-2,0],[2,0],[0,-2],[0,2]])if(Math.abs(hAt(x+ax,z+az)-h)>1)fl=false;if(fl&&h>WATER){const tt=L[Math.floor(hash(lgx,lgz,92)*L.length)];if(!(BIGR[tt]>10&&((lgx+lgz)&1))){t=tt;LMK=BIGR[tt]||6}}}}
+    // drobne detale w każdym biomie: kamyki, kwiaty, paprocie, kępy trawy
+    if(t<0&&!LMK){const q=hash(wx,wz,81);const X=XTRA[b];if(X&&q<X[0])t=X[1+Math.floor(hash(wx,wz,82)*(X.length-1))]}
     if(t===9&&r2<0.4)t=24;
-    if(t===12)continue;   // bez dużych omszałych głazów
+    if(t===12||t===6)continue;   // bez głazów i kamieni
     if(t<0)continue;
-    if(avoid&&avoid.some(q=>Math.hypot(q[0]-wx,q[1]-wz)<q[2]))continue;
+    if(avoid&&avoid.some(q=>(!q[3]||LMK)&&Math.hypot(q[0]-wx,q[1]-wz)<q[2]+(LMK||0)))continue;
     if(RD[(z+B)*W+x+B])continue;
     // drzewa nie przy krawędzi chunka obok siebie: odstęp przez siatkę 2x2
     if(t===12&&((wx%3)||(wz%3)))continue;
-    let sc=t===7||t===10?1:TREES.has(t)?0.85+hash(wx,wz,3)*0.4:0.75+hash(wx,wz,3)*0.6;if(b===19&&t===11&&r<0.03)sc=2.8+hash(wx,wz,7)*2.6;if(b===20&&t===5)sc*=0.8;
-    DEC.push(t,wx+0.5+(hash(wx,wz,4)-0.5)*0.4,h,wz+0.5+(hash(wx,wz,5)-0.5)*0.4,sc,hash(wx,wz,6)*Math.PI*2);
+    let sc=t===7||t===10?1:TREES.has(t)?0.85+hash(wx,wz,3)*0.4:0.75+hash(wx,wz,3)*0.6;if(LMK||t>=32)sc=0.9+hash(wx,wz,3)*0.3;
+    if(t===15&&(b===9||b===26))sc=1.9+hash(wx,wz,8)*0.9;   // olbrzymie drzewa dżungli
+    if(sc>1.6&&avoid&&avoid.some(q=>(!q[3]||LMK)&&Math.hypot(q[0]-wx,q[1]-wz)<q[2]+8*sc))continue;if(b===19&&t===11&&r<0.03)sc=2.8+hash(wx,wz,7)*2.6;if(b===20&&t===5)sc*=0.8;
+    // obiekty o szerokiej podstawie osadzamy na najniższym punkcie pod sobą — nic nie wisi nad zboczem
+    let dy=h;{const big=LMK||t>=32||sc>1.6,fr=big?2:(TREES.has(t)||t===11||t===4||t===14||t===48)?1:0;if(fr){for(const [ax,az] of [[-fr,0],[fr,0],[0,-fr],[0,fr],[-fr,-fr],[fr,fr],[-fr,fr],[fr,-fr]]){const q=hAt(x+ax,z+az);if(q!==undefined&&q<dy&&q>=WATER&&!wAt(x+ax,z+az))dy=q}if(dy<h-3)dy=h-3}}
+    if(s>1){const gx=x-(x%s),gz=z-(z%s),H0=hAt(gx,gz);if(H0<WATER||wAt(gx,gz))continue;/* drzewa tylko na lądzie: kratka LOD pod drzewem jest wodą → pomijamy */if(H0!==undefined)dy=H0}/* LOD: teren dalekiego chunka to kratki co s bloków — drzewo stawiamy na wysokości tej kratki, inaczej wisiało nad zboczem */
+    DEC.push(t,wx+0.5+(hash(wx,wz,4)-0.5)*0.4,dy,wz+0.5+(hash(wx,wz,5)-0.5)*0.4,sc,hash(wx,wz,6)*Math.PI*2);
   }
   for(const p of plotsHere){for(let z=0;z<C;z++)for(let x=0;x<C;x++){const cr=frAt(x,z);if(!cr||fdAt(x,z)!==1)continue;const wx=wx0+x,wz=wz0+z;
-      DEC.push(cr,wx+0.5,hAt(x,z),wz+0.5,0.9+hash(wx,wz,71)*0.25,(Math.floor(hash(wx,wz,72)*4))*Math.PI/2+0.01)}
+      if(s>1&&(hAt(x-(x%s),z-(z%s))<WATER||wAt(x-(x%s),z-(z%s))))continue;DEC.push(cr,wx+0.5,s>1?hAt(x-(x%s),z-(z%s)):hAt(x,z),wz+0.5,0.9+hash(wx,wz,71)*0.25,(Math.floor(hash(wx,wz,72)*4))*Math.PI/2+0.01)}
     // płot: co 2 bloki po obwodzie (pole ma płot tylko na wsi lub z jednej strony)
     for(const [x0,z0,x1,z1,rot] of [[p.x-p.hw-0.5,p.z-p.hd-0.5,p.x+p.hw+0.5,p.z-p.hd-0.5,0],[p.x-p.hw-0.5,p.z+p.hd+0.5,p.x+p.hw+0.5,p.z+p.hd+0.5,0],[p.x-p.hw-0.5,p.z-p.hd-0.5,p.x-p.hw-0.5,p.z+p.hd+0.5,1],[p.x+p.hw+0.5,p.z-p.hd-0.5,p.x+p.hw+0.5,p.z+p.hd+0.5,1]]){
       const n=Math.round(Math.hypot(x1-x0,z1-z0)/2);for(let k=0;k<n;k++){if(hash(Math.round(p.x)+k,Math.round(p.z)+rot,73)<0.18)continue;const px=x0+(x1-x0)*(k+0.5)/n,pz=z0+(z1-z0)*(k+0.5)/n,lx=Math.floor(px)-wx0,lz=Math.floor(pz)-wz0;if(lx<0||lz<0||lx>=C||lz>=C||rdAt(lx,lz))continue;
@@ -408,14 +549,15 @@ const SR=192, scache=new Map();
 function structAt(gx,gz,sx,sz){
   const key=gx+','+gz+','+sx+','+sz;if(scache.has(key))return scache.get(key);
   let res=null;
+  if(GEN===2){const cx=gx*SR+SR/2,cz=gz*SR+SR/2,I=islandAt(Math.floor(cx/IC),Math.floor(cz/IC));if(I&&Math.floor(I.x/SR)===gx&&Math.floor(I.z/SR)===gz){const x=Math.round(I.x),z=Math.round(I.z),[h,b]=sample(x,z);if(h>=WATER+2&&Math.hypot(x-sx,z-sz)>200){const hs=[];for(let j=-4;j<=4;j++)for(let i=-4;i<=4;i++)hs.push(sample(x+i*3,z+j*3)[0]);res={id:'s'+gx+'_'+gz,type:'loch',isl:1,x:x+0.5,z:z+0.5,h,b,hs,fl:0};scache.set(key,res);return res}}}
   if(hash(gx,gz,201)<0.75){
-    const x=Math.round(gx*SR+SR/2+(hash(gx,gz,203)-0.5)*SR*0.6),z=Math.round(gz*SR+SR/2+(hash(gx,gz,204)-0.5)*SR*0.6);
+    const x=Math.round(gx*SR+SR/2+(hash(gx,gz,203)-0.5)*SR*0.3),z=Math.round(gz*SR+SR/2+(hash(gx,gz,204)-0.5)*SR*0.3);
     const [h,b]=sample(x,z);
     if(h<WATER-4&&hash(gx,gz,211)<0.35&&Math.hypot(x-sx,z-sz)>80){const hs=[];for(let j=-4;j<=4;j++)for(let i=-4;i<=4;i++)hs.push(sample(x+i*3,z+j*3)[0]);res={id:'s'+gx+'_'+gz,type:'wrak',x:x+0.5,z:z+0.5,h,b,hs,fl:0};scache.set(key,res);return res}
     let ok=h>=WATER+1&&Math.hypot(x-sx,z-sz)>60;
     if(ok){let mn=h,mx=h;for(let k=0;k<12&&ok;k++){const a=k/12*Math.PI*2;for(const r of [5,10]){const s=sH(x+Math.cos(a)*r,z+Math.sin(a)*r);if(s<WATER)ok=false;mn=Math.min(mn,s);mx=Math.max(mx,s)}}if(mx-mn>8)ok=false}
-    if(ok){const vx=Math.floor(x/VR),vz=Math.floor(z/VR);for(let dz=-1;dz<=1&&ok;dz++)for(let dx=-1;dx<=1&&ok;dx++){const v=villageAt(vx+dx,vz+dz,sx,sz);if(v&&Math.hypot(v.x-x,v.z-z)<80)ok=false}}
-    if(ok&&cityNear(x,z,sx,sz,70))ok=false;
+    if(ok){const vx=Math.floor(x/VR),vz=Math.floor(z/VR);for(let dz=-1;dz<=1&&ok;dz++)for(let dx=-1;dx<=1&&ok;dx++){const v=villageAt(vx+dx,vz+dz,sx,sz);if(v){let vr=40;for(const hh of v.houses)vr=Math.max(vr,Math.hypot(hh.x-v.x,hh.z-v.z)+12);if(Math.hypot(v.x-x,v.z-z)<vr+45)ok=false}}}
+    if(ok&&cityNear(x,z,sx,sz,95))ok=false;
     if(ok){
       const r=hash(gx,gz,202);let type=r<0.1?'kurhan':r<0.26&&b!==5&&b!==6?'oboz':r<0.35?'wieza':r<0.43?'ruiny':r<0.47?(Math.hypot(x-sx,z-sz)>320?'legowisko':'ruiny'):r<0.56?'krag':r<0.66?'gniazdo':r<0.76?'kopalnia':r<0.86?'oltarz':r<0.94&&b!==4?'wiatrak':'ruiny';
       const r3=hash(gx,gz,207);
@@ -423,9 +565,17 @@ function structAt(gx,gz,sx,sz){
       else if(r3<0.16&&(b===4||b===5||b===6||b===8||b===12)&&Math.hypot(x-sx,z-sz)>350)type='grota';
       else if(r3<0.34)type=['gospoda','kupcy','pustelnia','swiatynia'][Math.floor(hash(gx,gz,208)*4)];
       else if(r3<0.46)type=(b===6||b===5||b===12||b===3||b===10||h>WATER+18)?'jaskinia':'loch';
-      {let wc=0;for(let k=0;k<12;k++){const a=k/12*Math.PI*2;if(sH(x+Math.cos(a)*45,z+Math.sin(a)*45)<WATER-1)wc++}if(wc>=9&&type!=='zamczysko')type=hash(gx,gz,212)<0.5?'loch':'kurhan'}
+      else if(r3>0.9&&Math.hypot(x-sx,z-sz)>140)type='wyspy';   // podniebne wyspy: lewitujące skały nad światem
+      {let wc=0;for(let k=0;k<12;k++){const a=k/12*Math.PI*2;if(sH(x+Math.cos(a)*45,z+Math.sin(a)*45)<WATER-1)wc++}if(wc>=9&&type!=='zamczysko')type=hash(gx,gz,212)<0.5?'loch':'kurhan';
+       // v104: nowe struktury (zastępują część zwykłych)
+       const BASIC=['ruiny','oboz','wieza','kurhan','krag','gniazdo','kopalnia','oltarz','wiatrak','legowisko','loch','jaskinia'],r4=hash(gx,gz,215),far=Math.hypot(x-sx,z-sz);
+       if(BASIC.includes(type)&&r3>=0.1){let wn=0;for(let k=0;k<12;k++){const a=k/12*Math.PI*2;if(sH(x+Math.cos(a)*16,z+Math.sin(a)*16)<WATER)wn++}
+         if(wn>=2&&wn<=7&&wc<9){if(r4<0.2)type='piraci';else if(r4<0.34)type='latarnik';else if(r4<0.48)type='zatopiona'}
+         else if(b===6||h>WATER+24){if(r4<0.22)type='gryf';else if(r4<0.38)type='klasztor'}
+         else if(wn===0){if(r4<0.05&&far>260)type='wiezaczar';else if(r4<0.1&&far>200)type='widmo';else if(r4<0.14)type='klasztor';else if(r4<0.22)type='cyrk';else if(r4<0.27)type='most';else if(r4<0.32&&far>300)type='smok';else if(r4<0.42&&![4,5,15,16,17,28,35,46,47,48].includes(b))type='farma';else if(r4<0.46&&far>150)type='portal'}
+         if(BASIC.includes(type)&&wn===0){const r5=hash(gx,gz,216);const pick=[['obelisk',0.03],['akwedukt',0.06],['kolos',0.09],['cmentarz',0.13],['rozdroze',0.17],['kamieniolom',0.2],['gaj',0.24],['sterowiec',0.27],['ul',0.3],['meteoryt',0.33],['totemy',0.36],['sygnal',0.39]];for(const [t,th] of pick)if(r5<th){type=t;break}}}}
       const hs=[];for(let j=-4;j<=4;j++)for(let i=-4;i<=4;i++)hs.push(sample(x+i*3,z+j*3)[0]);
-      const FL={zamczysko:38,gospoda:10,kupcy:10,pustelnia:9,swiatynia:10}[type]||0;let fh=h;if(FL){const ss=[];for(let j=-2;j<=2;j++)for(let i=-2;i<=2;i++)ss.push(sample(x+i*FL/2,z+j*FL/2)[0]);ss.sort((a,b)=>a-b);fh=Math.max(WATER+1,ss[12])}
+      const FL={zamczysko:38,gospoda:10,kupcy:10,pustelnia:9,swiatynia:10,cmentarz:11,rozdroze:7,gaj:10,totemy:8,klasztor:13,cyrk:13,farma:12,widmo:13,most:13,wiezaczar:8}[type]||0;let fh=h;if(FL){const ss=[];for(let j=-2;j<=2;j++)for(let i=-2;i<=2;i++)ss.push(sample(x+i*FL/2,z+j*FL/2)[0]);ss.sort((a,b)=>a-b);fh=Math.max(WATER+1,ss[12])}
       res={id:'s'+gx+'_'+gz,type,x:x+0.5,z:z+0.5,h:FL?fh:h,b,hs,fl:FL};
     }
   }
@@ -433,8 +583,8 @@ function structAt(gx,gz,sx,sz){
 }
 function avoidList(cx,cz,sx,sz){
   const l=[],wx=cx*C+16,wz=cz*C+16,rx=Math.floor(wx/VR),rz=Math.floor(wz/VR),gx=Math.floor(wx/SR),gz=Math.floor(wz/SR);
-  for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){const v=villageAt(rx+dx,rz+dz,sx,sz);if(v){l.push([v.x,v.z,15]);for(const h of v.houses)l.push([h.x,h.z,8])}const s=structAt(gx+dx,gz+dz,sx,sz);if(s)l.push([s.x,s.z,s.type==='zamczysko'?54:s.type==='grota'?18:s.fl?15:s.type==='kurhan'?15:13])}
-  {const c=cityNear(wx,wz,sx,sz,60);if(c)l.push([c.x,c.z,c.Hs*1.5])}
+  for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){const v=villageAt(rx+dx,rz+dz,sx,sz);if(v){let vr=15;for(const h of v.houses)vr=Math.max(vr,Math.hypot(h.x-v.x,h.z-v.z)+12);l.push([v.x,v.z,15]);l.push([v.x,v.z,vr,1]);for(const h of v.houses)l.push([h.x,h.z,9]);try{const F=farmsOf(v);for(const q of F.huts)l.push([q.x,q.z,7]);for(const q of F.mills)l.push([q.x,q.z,8])}catch(_){}}const s=structAt(gx+dx,gz+dz,sx,sz);if(s)l.push([s.x,s.z,s.type==='zamczysko'?54:s.type==='grota'?18:({klasztor:17,cyrk:16,farma:16,widmo:16,most:16,smok:20,piraci:26,zatopiona:16,latarnik:10,portal:9,gryf:9,wiezaczar:10,obelisk:7,akwedukt:15,kolos:10,cmentarz:13,rozdroze:9,kamieniolom:11,gaj:11,sterowiec:12,ul:9,meteoryt:12,totemy:9,sygnal:6})[s.type]||(s.fl?15:s.type==='kurhan'?15:13)])}
+  {const c=cityNear(wx,wz,sx,sz,60);if(c){l.push([c.x,c.z,c.Hs*1.5]);try{const F=farmsOf(c);for(const q of F.huts)l.push([q.x,q.z,7]);for(const q of F.mills)l.push([q.x,q.z,8])}catch(_){}}}
   return l;
 }
 
@@ -445,8 +595,8 @@ const CROPS=[20,21,22,20];
 function farmsOf(s){if(s.farm)return s.farm;const plots=[],huts=[],mills=[],rects=[];const city=!!s.city;
   const ok=(x,z,hw,hd)=>{for(const r of rects)if(Math.abs(r[0]-x)<r[2]+hw+2.5&&Math.abs(r[1]-z)<r[3]+hd+2.5)return false;return true};
   const flat=(x,z,hw,hd)=>{const ss=[];for(const ax of [-1,0,1])for(const az of [-1,0,1]){const [h,b]=sample(Math.round(x+ax*hw),Math.round(z+az*hd));if(h<WATER+1||b===0)return null;ss.push(h)}ss.sort((a,b)=>a-b);if(ss[8]-ss[0]>2)return null;return ss[4]};
-  if(city)rects.push([s.x,s.z,s.Hs+6,s.Hs+6]);else{rects.push([s.x,s.z,14,14]);for(const h of (s.houses||[]))rects.push([h.x,h.z,6.5,6.5])}
-  const N=city?40:30,maxP=city?14:9,R0=city?s.Hs+12:30,RR=city?36:26;
+  if(city)rects.push([s.x,s.z,s.Hs*1.18+6,s.Hs*1.18+6]);else{rects.push([s.x,s.z,14,14]);for(const h of (s.houses||[]))rects.push([h.x,h.z,6.5,6.5])}
+  const N=city?40:30,maxP=city?14:9,R0=city?s.Hs*1.2+12:30,RR=city?40:26;
   for(let k=0;k<N&&plots.length<maxP;k++){const a=k/N*Math.PI*2+hash(Math.round(s.x),k,401)*0.4,r=R0+hash(Math.round(s.z),k,402)*RR;
     const x=Math.round(s.x+Math.cos(a)*r)+0.5,z=Math.round(s.z+Math.sin(a)*r)+0.5;if(city&&(Math.abs(x-s.x)<10||Math.abs(z-s.z)<10))continue;
     const hw=4+Math.floor(hash(k,Math.round(s.x),403)*3),hd=5+Math.floor(hash(k,Math.round(s.z),404)*3);if(!ok(x,z,hw,hd))continue;const h=flat(x,z,hw,hd);if(h==null)continue;
@@ -457,21 +607,27 @@ function farmsOf(s){if(s.farm)return s.farm;const plots=[],huts=[],mills=[],rect
       const rot=Math.round(Math.atan2(p.x-x,p.z-z)/(Math.PI/2))*(Math.PI/2);huts.push({x,z,h,rot});break}}
     if(mills.length<(city?2:1)&&(i%3===1||(!city&&i===plots.length-1))){const x=p.x+far[0]*(Math.max(p.hw,p.hd)+8),z=p.z+far[1]*(Math.max(p.hw,p.hd)+8);if(ok(x,z,3.5,3.5)){const h=flat(x,z,3,3);if(h!=null){rects.push([x,z,3.5,3.5]);mills.push({x:Math.round(x)+0.5,z:Math.round(z)+0.5,h})}}}});
   s.farm={plots,huts,mills};return s.farm}
+
+// poziomy miasta (tarasy): pierścienie wokół centrum, zamek na najwyższym tarasie; ulice przechodzą między poziomami schodami
+/*CITYPLAN*/
+function cityLvl(c,dx,dz,street){return cityPlan(c).lvlAt(dx,dz,street)}
 const CR=1300, ccache=new Map();
 function cityAt(gx,gz,sx,sz){
   const key=gx+','+gz+','+sx+','+sz;if(ccache.has(key))return ccache.get(key);let res=null;
   if(hash(gx,gz,301)<0.8){
     const cx=gx*CR+CR/2+(hash(gx,gz,302)-0.5)*CR*0.5,cz=gz*CR+CR/2+(hash(gx,gz,303)-0.5)*CR*0.5;
-    for(let t=0;t<30&&!res;t++){
-      const a=t*2.4,r=t*14,x=Math.round(cx+Math.cos(a)*r),z=Math.round(cz+Math.sin(a)*r);
-      if(Math.hypot(x-sx,z-sz)<320)continue;
+    for(let t=0;t<48&&!res;t++){
+      const a=t*2.4,r=t*12,x=Math.round(cx+Math.cos(a)*r),z=Math.round(cz+Math.sin(a)*r);
+      if(Math.hypot(x-sx,z-sz)<(160+Math.floor(hash(gx,gz,304)*44))*1.3+150)continue;
       const [h,b]=sample(x,z);if(h<WATER+2||h>WATER+26||b===0)continue;
-      const Hs=52+Math.floor(hash(gx,gz,304)*14);let ok=true;const ss=[];
-      for(let k=0;k<20&&ok;k++){const aa=k/20*Math.PI*2;for(const rr of [Hs*0.5,Hs,Hs*1.12]){const s=sH(x+Math.cos(aa)*rr,z+Math.sin(aa)*rr);if(s<WATER+1)ok=false;ss.push(s)}}
-      if(!ok)continue;ss.sort((p,q)=>p-q);if(ss[ss.length-3]-ss[2]>12)continue;
+      const Hs=160+Math.floor(hash(gx,gz,304)*44);let ok=true;const ss=[];
+      let wet=0;for(let k=0;k<20&&ok;k++){const aa=k/20*Math.PI*2;for(const rr of [Hs*0.3,Hs*0.62,Hs*0.95]){const s=sH(x+Math.cos(aa)*rr,z+Math.sin(aa)*rr);if(s<WATER+1){if(rr<Hs*0.5)ok=false;else wet++}else ss.push(s)}}
+      /* większe miasta: środek musi być suchy, na obrzeżach trochę wody (zostanie zasypana pod zabudowę) */if(!ok||wet>9)continue;ss.sort((p,q)=>p-q);if(ss[ss.length-3]-ss[2]>24)continue;
       const KK=GEN===2?kingdomAt(x,z):null,race=KK?KK.race:(b===7||b===9)?'saurianie':(b===19||b===20)?'drowy':(b===3||b===10||b===11)?'elfy':(b===5||b===6||b===12)?'krasnoludy':(b===4||b===8)?'orkowie':(b===2&&hash(x,z,977)<0.3)?'niziolki':'ludzie';
+      /* miasto w całości wewnątrz jednego królestwa — z zapasem od granicy */if(KK){let inK=true;for(let k=0;k<24&&inK;k++){const aa=k/24*Math.PI*2;for(const rr of [Hs+35,Hs+80])if(kingdomAt(x+Math.cos(aa)*rr,z+Math.sin(aa)*rr).id!==KK.id){inK=false;break}}if(!inK)continue}
       res={id:'C'+gx+'_'+gz,city:1,gx,gz,x:x+0.5,z:z+0.5,h:Math.max(WATER+2,ss[ss.length>>1]),b,race,kid:KK?KK.id:null,Hs,houses:[]};
-      if(GEN===2){res.gen=2;let best=-1,bd=1e9;[[0,-1],[0,1],[-1,0],[1,0]].forEach(([ax,az],si)=>{for(let rr=Hs+8;rr<=Hs+100;rr+=4){const px=x+ax*rr,pz=z+az*rr;if(sample(px,pz)[0]<WATER-1){if(rr<bd){bd=rr;best=si}break}}});if(best>=0){res.port=best;res.portD=bd}}
+      {const nB=[36.5,59.5,82.5].filter(q=>q<Hs-8).length,st=2+(hash(gx,gz,306)<0.45?1:0);res.lv=[];for(let k=0;k<=nB;k++)res.lv.push((nB-k)*st);res.cq=[hash(gx,gz,307)<0.5?1:-1,hash(gx,gz,308)<0.5?1:-1];{const K=cityPlan(res).castle;res.kq=[K.x,K.z,K.R]}}
+      if(GEN===2){res.gen=2;let best=-1,bd=1e9;[[0,-1],[0,1],[-1,0],[1,0]].forEach(([ax,az],si)=>{for(let rr=Hs+8;rr<=Hs+110;rr+=4){const px=x+ax*rr,pz=z+az*rr;if(sample(px,pz)[0]<WATER-1){if(rr<bd){bd=rr;best=si}break}}});if(best>=0){res.port=best;res.portD=bd}}
       farmsOf(res);
     }
   }
@@ -516,8 +672,11 @@ function findSpawn(){
 self.onmessage=e=>{
   const m=e.data; if((m.gen||1)!==GEN){GEN=m.gen||1;SEED=-1;vcache.clear();scache.clear();ccache.clear();nbCache.clear();roadCache.clear()} setSeed(m.seed);
   if(m.type==='spawn'){self.postMessage({type:'spawn',id:m.id,seed:m.seed,...findSpawn()});return}
+  if(m.type==='kpts'){self.postMessage({type:'kpts',ids:m.pts.map(([x,z])=>{const k=kingdomAt(x,z);return k?k.id:null})});return}
+  if(m.type==='bfind'){/* szukanie biomu (testy/teleport) */let res=null;for(let r=0;r<m.R&&!res;r+=48)for(let a=0;a<6.283;a+=Math.max(0.05,24/Math.max(r,1))){const x=m.x+Math.cos(a)*r,z=m.z+Math.sin(a)*r,q=sample(x,z);if(q[1]===m.b){res=[x,z,q[0]];break}}self.postMessage({type:'bfind',res});return}
   if(m.type==='city'){self.postMessage({type:'city',list:m.cells.map(([gx,gz])=>({gx,gz,c:cityAt(gx,gz,m.sx,m.sz)}))});return}
   if(m.type==='roads'){self.postMessage({type:'roads',list:roadsNear(m.x,m.z,m.r,m.sx,m.sz)});return}
+  if(m.type==='isl'){const L=[];if(GEN===2){const g0x=Math.floor(m.x/IC),g0z=Math.floor(m.z/IC);for(let dz=-6;dz<=6;dz++)for(let dx=-6;dx<=6;dx++){const I=islandAt(g0x+dx,g0z+dz);if(!I)continue;const h=sample(Math.round(I.x),Math.round(I.z))[0];if(h>=WATER+2&&Math.hypot(I.x-m.sx,I.z-m.sz)>200)L.push([Math.round(I.x)+0.5,Math.round(I.z)+0.5,Math.round(I.rad)])}}L.sort((a,b)=>Math.hypot(a[0]-m.x,a[1]-m.z)-Math.hypot(b[0]-m.x,b[1]-m.z));self.postMessage({type:'isl',list:L.slice(0,8)});return}
   if(m.type==='str'){self.postMessage({type:'str',list:m.cells.map(([gx,gz])=>({gx,gz,s:structAt(gx,gz,m.sx,m.sz)}))});return}
   if(m.type==='kingdoms'){self.postMessage({type:'kingdoms',list:m.cells.map(([gx,gz])=>kingdomCell(gx,gz))});return}
   if(m.type==='vill'){self.postMessage({type:'vill',list:m.regions.map(([rx,rz])=>({rx,rz,v:villageAt(rx,rz,m.sx,m.sz)}))});return}

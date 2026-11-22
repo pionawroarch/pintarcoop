@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+<defs>
+<g id="axe">
+ <!-- trzonek -->
+ <rect x="-2" y="-22" width="4" height="50" fill="#6b4a2b"/>
+ <rect x="-2" y="-22" width="1.5" height="50" fill="#8a6440"/>
+ <rect x="-2.5" y="18" width="5" height="3" fill="#3a2416"/><rect x="-2.5" y="23" width="5" height="3" fill="#3a2416"/>
+ <rect x="-3" y="27" width="6" height="4" fill="#2a1a10"/>
+ <!-- obuch i oko -->
+ <rect x="-3" y="-26" width="6" height="9" fill="#5e646a"/>
+ <rect x="2" y="-24" width="4" height="5" fill="#4a5056"/>
+ <!-- ostrze brodate skierowane na zewnątrz (w lewo) -->
+ <path d="M-3 -26 L-10 -28 L-17 -31 L-19 -24 L-19 -14 L-17 -9 L-12 -11 L-7 -15 L-3 -17 Z" fill="#c9cfd4"/>
+ <path d="M-17 -31 L-19 -24 L-19 -14 L-17 -9 L-15.5 -10 L-17 -15 L-17 -24 L-15.5 -30 Z" fill="#eef2f5"/>
+ <path d="M-3 -26 L-10 -28 L-11 -26 L-3 -24 Z" fill="#9aa1a8"/>
+ <rect x="-8" y="-22" width="3" height="3" fill="#8a8f94"/>
+</g>
+</defs>
+<rect width="64" height="64" rx="12" fill="#1a120b"/>
+<rect x="2" y="2" width="60" height="60" rx="10" fill="none" stroke="#c9a24a" stroke-width="2"/>
+<g transform="translate(32 34) scale(0.88) rotate(-38)"><use href="#axe"/></g>
+<g transform="translate(32 34) scale(-0.88 0.88) rotate(-38)"><use href="#axe"/></g>
+</svg>

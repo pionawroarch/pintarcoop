@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Gra CO-OP</title>
+<title>Pintar</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgc2hhcGUtcmVuZGVyaW5nPSJjcmlzcEVkZ2VzIj4KPGRlZnM+CjxnIGlkPSJheGUiPgogPCEtLSB0cnpvbmVrIC0tPgogPHJlY3QgeD0iLTIiIHk9Ii0yMiIgd2lkdGg9IjQiIGhlaWdodD0iNTAiIGZpbGw9IiM2YjRhMmIiLz4KIDxyZWN0IHg9Ii0yIiB5PSItMjIiIHdpZHRoPSIxLjUiIGhlaWdodD0iNTAiIGZpbGw9IiM4YTY0NDAiLz4KIDxyZWN0IHg9Ii0yLjUiIHk9IjE4IiB3aWR0aD0iNSIgaGVpZ2h0PSIzIiBmaWxsPSIjM2EyNDE2Ii8+PHJlY3QgeD0iLTIuNSIgeT0iMjMiIHdpZHRoPSI1IiBoZWlnaHQ9IjMiIGZpbGw9IiMzYTI0MTYiLz4KIDxyZWN0IHg9Ii0zIiB5PSIyNyIgd2lkdGg9IjYiIGhlaWdodD0iNCIgZmlsbD0iIzJhMWExMCIvPgogPCEtLSBvYnVjaCBpIG9rbyAtLT4KIDxyZWN0IHg9Ii0zIiB5PSItMjYiIHdpZHRoPSI2IiBoZWlnaHQ9IjkiIGZpbGw9IiM1ZTY0NmEiLz4KIDxyZWN0IHg9IjIiIHk9Ii0yNCIgd2lkdGg9IjQiIGhlaWdodD0iNSIgZmlsbD0iIzRhNTA1NiIvPgogPCEtLSBvc3RyemUgYnJvZGF0ZSBza2llcm93YW5lIG5hIHpld27EhXRyeiAodyBsZXdvKSAtLT4KIDxwYXRoIGQ9Ik0tMyAtMjYgTC0xMCAtMjggTC0xNyAtMzEgTC0xOSAtMjQgTC0xOSAtMTQgTC0xNyAtOSBMLTEyIC0xMSBMLTcgLTE1IEwtMyAtMTcgWiIgZmlsbD0iI2M5Y2ZkNCIvPgogPHBhdGggZD0iTS0xNyAtMzEgTC0xOSAtMjQgTC0xOSAtMTQgTC0xNyAtOSBMLTE1LjUgLTEwIEwtMTcgLTE1IEwtMTcgLTI0IEwtMTUuNSAtMzAgWiIgZmlsbD0iI2VlZjJmNSIvPgogPHBhdGggZD0iTS0zIC0yNiBMLTEwIC0yOCBMLTExIC0yNiBMLTMgLTI0IFoiIGZpbGw9IiM5YWExYTgiLz4KIDxyZWN0IHg9Ii04IiB5PSItMjIiIHdpZHRoPSIzIiBoZWlnaHQ9IjMiIGZpbGw9IiM4YThmOTQiLz4KPC9nPgo8L2RlZnM+CjxyZWN0IHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgcng9IjEyIiBmaWxsPSIjMWExMjBiIi8+CjxyZWN0IHg9IjIiIHk9IjIiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcng9IjEwIiBmaWxsPSJub25lIiBzdHJva2U9IiNjOWEyNGEiIHN0cm9rZS13aWR0aD0iMiIvPgo8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzMiAzNCkgc2NhbGUoMC44OCkgcm90YXRlKC0zOCkiPjx1c2UgaHJlZj0iI2F4ZSIvPjwvZz4KPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzIgMzQpIHNjYWxlKC0wLjg4IDAuODgpIHJvdGF0ZSgtMzgpIj48dXNlIGhyZWY9IiNheGUiLz48L2c+Cjwvc3ZnPgo=">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Alegreya+Sans:wght@400;500;700&family=Poppins:wght@600&family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -65,11 +66,19 @@ kbd{font:600 11px Poppins,sans-serif;background:rgba(255,255,255,.14);border-rad
 .ebar i{display:block;height:6px;border-radius:4px;background:rgba(0,0,0,.55);overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.3)}
 .ebar b{display:block;height:100%;background:#e5483b}
 .ebar.elite span{color:#ffd34d}.ebar.elite b{background:#ff9d2e}
+.ebar.ally span{color:#9ef09e}.ebar.ally b{background:#4ab84a}
 .ebar.pl{width:60px}.ebar.pl b{background:#62d26d}
+#revui{position:fixed;left:50%;top:62%;transform:translateX(-50%);width:320px;display:none;z-index:45;pointer-events:none;text-align:center;font:600 14px Poppins,sans-serif;color:#fff;text-shadow:0 1px 3px #000}#revui .rb{margin-top:6px;height:14px;background:rgba(0,0,0,.6);border:2px solid #d9b23a;border-radius:8px;overflow:hidden}#revui i{display:block;height:100%;background:linear-gradient(#9ef09e,#3a9a3a);transition:width .1s}
+#cdbar{position:fixed;left:50%;bottom:102px;transform:translateX(-50%);display:flex;gap:10px;pointer-events:none;z-index:7}
+.cdi{width:118px;font:600 10px/1.2 Poppins,sans-serif;color:#f2e6cc;text-shadow:0 1px 2px #000}.cdi b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.cdi span{display:block;height:6px;background:rgba(0,0,0,.6);border:1px solid rgba(0,0,0,.7);margin:2px 0}.cdi i{display:block;height:100%;background:linear-gradient(#9ab0c8,#5a6e88)}.cdi.rdy i{background:linear-gradient(#ffe08a,#d8a030)}.cdi em{font-style:normal;opacity:.85;white-space:nowrap;margin-left:4px}.cdt{display:flex;justify-content:space-between}
+#lowhp{position:fixed;inset:0;pointer-events:none;box-shadow:inset 0 0 220px 60px rgba(120,0,0,.9);opacity:0;z-index:4}
+.hdir{position:fixed;left:50%;top:50%;width:0;height:0;border-left:34px solid transparent;border-right:34px solid transparent;border-bottom:26px solid rgba(255,40,30,.85);filter:drop-shadow(0 0 8px rgba(255,0,0,.8));pointer-events:none;z-index:6}
+.hpshake{animation:hpsh .35s}@keyframes hpsh{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
 #hurt{position:fixed;inset:0;pointer-events:none;box-shadow:inset 0 0 140px 30px rgba(220,30,20,.8);opacity:0}
 #bar{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);display:flex;gap:10px;align-items:center;padding:8px 10px}
 #hpw{width:min(300px,40vw);height:20px;border-radius:7px;background:rgba(0,0,0,.45);position:relative;overflow:hidden}
-#hpb{height:100%;background:linear-gradient(#ff6a5c,#c9332a);width:100%;transition:width .15s}
+#hpb{position:relative;height:100%;background:linear-gradient(#ff6a5c,#c9332a);width:100%;transition:width .15s}
 #hpt{position:absolute;inset:0;text-align:center;font:600 12px/20px Poppins,sans-serif;text-shadow:0 1px 2px #000}
 .chip{display:flex;align-items:center;gap:6px;font-weight:600;font-size:13px;white-space:nowrap}
 .dot{width:12px;height:12px;border-radius:50%;display:inline-block}
@@ -391,6 +400,14 @@ input,select{border-radius:0!important;border:none!important;background:#1a120b!
 .fpick{margin-top:8px;display:flex;flex-direction:column;gap:4px;max-height:220px;overflow:auto}.fpick button{display:flex;align-items:center;gap:8px;text-align:left;padding:4px 8px}.fpick button .icimg,.fpick button .ic{width:28px;height:28px}.fpick small{margin-left:auto;opacity:.7}
 
 #chestui{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,92vw);max-height:76vh;overflow:auto;padding:16px 18px;z-index:30}
+#tradeui{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(860px,96vw);max-height:84vh;overflow:auto;padding:16px 18px;z-index:30}
+.trhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px}.trhead h2{margin:0}.trgold{color:#ffd34d;font-weight:700;font-size:18px}
+.trcols{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:10px 0}.trcols h3{margin:4px 0 8px;font-size:15px;opacity:.9}.trcols h3 small{opacity:.7;font-weight:400}
+.trgrid{display:grid;grid-template-columns:repeat(auto-fill,58px);gap:6px 6px}
+.tslot{width:58px!important;height:70px!important;align-content:start;padding-top:3px!important;cursor:pointer}.tslot .icimg{width:46px;height:46px}.tslot small{bottom:17px!important}.tslot .cic{font-size:30px;line-height:46px}
+.tpr{position:absolute;left:0;right:0;bottom:2px;font-style:normal;font-size:11px;color:#ffd34d;text-align:center;text-shadow:0 1px 2px #000}.tslot.dim{opacity:.5}#tradegoods h3{margin:6px 0 2px;font-size:15px}#tradegoods h3 small{opacity:.7;font-weight:400}.grow{display:grid;grid-template-columns:30px 1.2fr auto 1.4fr 70px auto;gap:8px;align-items:center;padding:5px 6px;border-bottom:1px solid #ffffff14;font-size:13px}.grow:hover{background:#ffffff0a}.gic{font-size:20px;text-align:center}.gtag{font-size:11px;padding:1px 6px;border-radius:8px;white-space:nowrap}.gcheap{background:#2f6a3a;color:#c8f0c0}.gdear{background:#8a3a2a;color:#ffd8c8}.gpr i{color:#ffd34d;font-style:normal}.ghave{opacity:.8}.gbt{display:flex;gap:4px}.gbt button{padding:2px 7px!important;font-size:12px!important}@media (max-width:640px){.grow{grid-template-columns:26px 1fr auto;}}.tslot.dim .tpr{color:#ff8a7a}.tslot:hover{border-color:#ffd34d}
+.tprice{margin:6px 0 0;color:#ffd34d}
+@media (max-width:640px){.trcols{grid-template-columns:1fr}}
 #chestui h2{margin:0 0 4px}#chestlist{display:flex;flex-direction:column;gap:6px;margin:10px 0}
 .crow{display:flex;align-items:center;gap:10px;padding:6px 8px;background:rgba(0,0,0,.28);box-shadow:inset 0 0 0 1px rgba(255,220,160,.12)}
 .crow .icimg,.crow .ic,.crow .cic{width:34px;height:34px;flex:none;display:grid;place-items:center;font-size:22px}.crow b{flex:1;min-width:0}.crow small{opacity:.7;font-size:11px;margin-right:4px}
@@ -413,6 +430,8 @@ input,select{border-radius:0!important;border:none!important;background:#1a120b!
 #fishui .fp{height:7px;margin-top:8px;background:rgba(0,0,0,.6);box-shadow:0 0 0 1px #000}#fishui .fp i{display:block;height:100%;width:0;background:#5ab8f0}
 #airw{position:fixed;left:50%;top:calc(50% + 86px);transform:translateX(-50%);width:120px;height:8px;background:rgba(0,0,0,.6);box-shadow:0 0 0 2px #120c07;z-index:5}#airw i{display:block;height:100%;background:linear-gradient(90deg,#7fd0ff,#dff4ff)}
 #kherb{position:fixed;top:120px;left:50%;transform:translateX(-50%) translateY(-10px);display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 18px;background:rgba(20,16,12,.78);border:1px solid rgba(201,162,74,.6);border-radius:10px;pointer-events:none;opacity:0;transition:opacity .6s,transform .6s;z-index:40;font-size:16px;text-align:center}#kherb.on{opacity:1;transform:translateX(-50%)}#kherb canvas{width:72px;height:88px}#kherb small{color:#cbbf9f;font-size:12px}
+
+#hotbar{bottom:126px!important}
 </style>
 </head>
 <body>
@@ -422,10 +441,10 @@ input,select{border-radius:0!important;border:none!important;background:#1a120b!
 <div id="minibox" class="pane"><canvas id="mini" width="180" height="180"></canvas>
   <div class="btns"><button id="mapbtn" style="flex:1">Mapa <kbd>M</kbd></button><button id="menubtn" style="flex:1">Menu <kbd>Tab</kbd></button></div></div>
 <div id="chat"><div id="chatlog"></div><div id="chatbox" class="pane" hidden><input id="chatin" maxlength="160" placeholder="Wiadomość do drużyny, Enter wysyła"></div></div>
-<div id="help" class="pane"><div class="hh"><b>Sterowanie</b> <kbd>H</kbd> zwiń / rozwiń</div><div class="hb"><span><kbd>WASD</kbd> ruch</span><span><kbd>Shift</kbd> sprint</span><span><kbd>Ctrl</kbd> skradanie</span><span><kbd>U</kbd> wędka</span><span><kbd>PPM</kbd> blok tarczą</span><span><kbd>\</kbd> wygląd</span><span><kbd>X</kbd> doskok</span><span><kbd>Spacja</kbd> skok / lotnia</span><span><kbd>LPM</kbd> atak</span><span><kbd>PPM</kbd> druga umiejętność</span><span><kbd>Q</kbd> pierwsza umiejętność</span><span><kbd>Alt</kbd> unik</span><span><kbd>F</kbd> rozmowa / drzwi / podnieś kompana</span><span><kbd>E</kbd> ekwipunek</span><span><kbd>M</kbd> mapa</span><span><kbd>J</kbd> dziennik</span><span><kbd>K</kbd> umiejętności</span><span><kbd>P</kbd> kompani</span><span><kbd>1–8</kbd> pasek</span><span><kbd>L</kbd> latarnia</span><span><kbd>B</kbd> łódź</span><span><kbd>T</kbd> oswój</span><span><kbd>N</kbd> rozbij szałas</span><span><kbd>Enter</kbd> czat</span><span><kbd>F3</kbd> statystyki techniczne</span></div></div>
-<div id="fx"></div><div id="hurt"></div>
+<div id="help" class="pane"><div class="hh"><b>Sterowanie</b> <kbd>H</kbd> zwiń / rozwiń</div><div class="hb"><span><kbd>WASD</kbd> ruch</span><span><kbd>Shift</kbd> sprint</span><span><kbd>Alt</kbd> skradanie</span><span><kbd>U</kbd> wędka</span><span><kbd>PPM</kbd> blok tarczą</span><span><kbd>\</kbd> wygląd</span><span><kbd>X</kbd> doskok</span><span><kbd>Spacja</kbd> skok / lotnia</span><span><kbd>LPM</kbd> atak</span><span><kbd>PPM</kbd> druga umiejętność</span><span><kbd>Q</kbd> pierwsza umiejętność</span><span><kbd>Ctrl</kbd> unik</span><span><kbd>F</kbd> rozmowa / drzwi / podnieś kompana</span><span><kbd>E</kbd> ekwipunek</span><span><kbd>M</kbd> mapa</span><span><kbd>J</kbd> dziennik</span><span><kbd>K</kbd> umiejętności</span><span><kbd>P</kbd> kompani</span><span><kbd>1–8</kbd> pasek</span><span><kbd>L</kbd> latarnia</span><span><kbd>B</kbd> łódź</span><span><kbd>T</kbd> oswój</span><span><kbd>N</kbd> rozbij szałas</span><span><kbd>0</kbd> wystrzał szczęścia</span><span><kbd>Enter</kbd> czat</span><span><kbd>F3</kbd> statystyki techniczne</span></div></div>
+<div id="fx"></div><div id="hurt"></div><div id="lowhp"></div>
 <div id="buffs"></div><div id="cross" hidden></div><div id="chgbar" hidden><i></i></div>
-<div id="chestui" class="pane" hidden><h2>Skrzynia</h2><p class="sub2">Wybierz, co zabierasz. Reszta zostanie w skrzyni.</p><div id="chestlist"></div><div class="cbtns"><button id="chestall">Weź wszystko</button><button id="chestclose">Zamknij <kbd>F</kbd></button></div></div><div id="fishui" class="pane" hidden><b>Hol ryby</b><small>Przytrzymaj <kbd>U</kbd>, żeby utrzymać napięcie w zielonym polu</small><div class="fz"><span></span><i></i></div><div class="fp"><i></i></div></div><div id="airw" hidden><i></i></div><div id="snk" hidden><b>Ukryty</b><span><i></i></span></div><div id="arenabar" class="pane" hidden></div><div id="hotbar"></div><div id="bar" class="pane"><div id="lvlb" title="Poziom"><span id="lvl">1</span></div><div id="hpcol"><div id="hpw"><div id="hpb"></div><div id="hpt"></div></div><div id="stw" title="Kondycja (sprint)"><div id="stb"></div></div><div id="xpw"><div id="xpb"></div></div><div id="xpt"></div></div><button class="ab" id="abq"><kbd>Q</kbd><span></span><i></i><em></em></button><button class="ab" id="abe"><kbd>PPM</kbd><span></span><i></i><em></em></button><button class="ab" id="abd"><kbd>X</kbd><span>Doskok</span><i></i><em></em></button><span class="chip"><i class="dot" style="background:#e5483b"></i><span id="pot">0</span></span><span class="chip"><i class="dot" style="background:#ffd34d"></i><span id="gold">0</span></span><button id="invbtn">Ekwipunek <kbd>E</kbd></button><button id="petsbtn">Kompani <kbd>P</kbd></button><button id="jbtn">Dziennik <kbd>J</kbd></button><button id="perkbtn">Umiejętności <kbd>K</kbd><span id="pts" hidden>0</span></button></div>
+<div id="tradeui" class="pane" hidden><div class="trhead"><h2 id="tradename">Kupiec</h2><span id="tradegold" class="trgold"></span></div><div class="trcols"><div><h3>Towary kupca</h3><div id="tradebuy" class="trgrid"></div></div><div><h3>Twój plecak <small id="tradebag"></small></h3><div id="tradesell" class="trgrid"></div></div></div><div id="tradegoods"></div><div class="cbtns"><button id="tradeclose">Zamknij <kbd>F</kbd></button></div></div><div id="chestui" class="pane" hidden><h2>Skrzynia</h2><p class="sub2">Wybierz, co zabierasz. Reszta zostanie w skrzyni.</p><div id="chestlist"></div><div class="cbtns"><button id="chestall">Weź wszystko</button><button id="chestclose">Zamknij <kbd>F</kbd></button></div></div><div id="fishui" class="pane" hidden><b>Hol ryby</b><small>Przytrzymaj <kbd>U</kbd>, żeby utrzymać napięcie w zielonym polu</small><div class="fz"><span></span><i></i></div><div class="fp"><i></i></div></div><div id="airw" hidden><i></i></div><div id="snk" hidden><b>Ukryty</b><span><i></i></span></div><div id="arenabar" class="pane" hidden></div><div id="hotbar"></div><div id="bar" class="pane"><div id="lvlb" title="Poziom"><span id="lvl">1</span></div><div id="hpcol"><div id="hpw"><div id="hpl" style="position:absolute;left:0;top:0;bottom:0;width:100%;background:#f0e0b0;opacity:.75"></div><div id="hpb"></div><div id="hpt"></div></div><div id="stw" title="Kondycja (sprint)"><div id="stb"></div></div><div id="xpw"><div id="xpb"></div></div><div id="xpt"></div></div><button class="ab" id="abq"><kbd>Q</kbd><span></span><i></i><em></em></button><button class="ab" id="abe"><kbd>PPM</kbd><span></span><i></i><em></em></button><button class="ab" id="abd"><kbd>X</kbd><span>Doskok</span><i></i><em></em></button><span class="chip"><i class="dot" style="background:#e5483b"></i><span id="pot">0</span></span><span class="chip"><i class="dot" style="background:#ffd34d"></i><span id="gold">0</span></span><button id="invbtn">Ekwipunek <kbd>E</kbd></button><button id="petsbtn">Kompani <kbd>P</kbd></button><button id="jbtn">Dziennik <kbd>J</kbd></button><button id="perkbtn">Umiejętności <kbd>K</kbd><span id="pts" hidden>0</span></button></div>
 <div id="toasts"></div>
 <div id="perks" hidden><div class="card pane">
   <div class="row" style="justify-content:space-between"><h1 style="margin:0">Drzewko umiejętności</h1><button id="perkclose">Zamknij <kbd>K</kbd></button></div>
@@ -463,10 +482,10 @@ input,select{border-radius:0!important;border:none!important;background:#1a120b!
   <p class="sub">Oswojone zwierzęta zostają z tobą na zawsze. Wybierz jednego, który chodzi z tobą i walczy; zdobywa poziomy razem z tobą.</p>
   <div class="pwrap"><div id="pgrid"></div><section id="pdet"></section></div><div id="folbox" style="margin-top:14px"></div>
 </div></div>
-<div id="mapwrap" class="pane" hidden><canvas id="bigmap"></canvas><button id="mapclose">Zamknij</button><div id="maphint">Kółko: przybliżanie · przeciąganie: przesuwanie · <b>klik: znacznik dla drużyny</b> · PPM: usuń znacznik · <button id="mapcenter">Wyśrodkuj na mnie</button></div></div>
+<div id="mapwrap" class="pane" hidden><canvas id="bigmap"></canvas><button id="mapclose">Zamknij</button><div id="maphint">Kółko: przybliżanie · przeciąganie: przesuwanie · <b>klik: notatka lub znacznik dla drużyny</b> · PPM: usuń notatkę/znacznik · <button id="mapcenter">Wyśrodkuj na mnie</button></div></div>
 
 <div id="menu" hidden><div class="card pane">
-  <h1>Gra CO-OP</h1><p class="sub">Grafika Pintara: voxele, pory roku, cykl dnia</p>
+  <h1>Pintar</h1><p class="sub">Kooperacyjna przygoda w świecie voxeli</p>
   <div class="cols">
     <section>
       <h2>Świat</h2>
@@ -474,6 +493,15 @@ input,select{border-radius:0!important;border:none!important;background:#1a120b!
       <input id="rd" type="range" min="4" max="24" step="1">
       <label for="volm">Muzyka</label><input id="volm" type="range" min="0" max="1" step="0.05"><label for="volf">Efekty dźwiękowe</label><input id="volf" type="range" min="0" max="1" step="0.05"><label for="fov">Pole widzenia (FOV): <b id="fovv">55</b>°</label><input id="fov" type="range" min="35" max="90" step="1">
       <label class="row" style="color:var(--ink);font-size:14px"><input id="shadow" type="checkbox"> Cienie</label>
+      <label for="vola">Odgłosy otoczenia (ptaki, wiatr, miasto)</label><input id="vola" type="range" min="0" max="1" step="0.05">
+      <div class="row"><div style="flex:1"><label for="gpfx">Cząsteczki i efekty</label><select id="gpfx"><option value="0.35">Mało</option><option value="0.65">Średnio</option><option value="1">Dużo</option></select></div>
+      <div style="flex:1"><label for="gfps">Limit klatek</label><select id="gfps"><option value="0">Bez limitu</option><option value="30">30 FPS</option><option value="60">60 FPS</option><option value="120">120 FPS</option></select></div></div>
+      <div class="row"><div style="flex:1"><label for="gfog">Mgła odległości</label><select id="gfog"><option value="0.75">Gęsta</option><option value="1">Normalna</option><option value="1.15">Rzadka</option></select></div>
+      <div style="flex:1"><label for="gbr">Jasność: <b id="gbrv">100</b>%</label><input id="gbr" type="range" min="0.7" max="1.4" step="0.05"></div></div>
+      <label for="gsat">Nasycenie barw: <b id="gsatv">100</b>%</label><input id="gsat" type="range" min="0.5" max="1.5" step="0.05">
+      <label class="row" style="color:var(--ink);font-size:14px"><input id="gblood" type="checkbox"> Krew i rozczłonkowanie wrogów</label>
+      <label class="row" style="color:var(--ink);font-size:14px"><input id="gshake" type="checkbox"> Wstrząsy kamery</label>
+      <label class="row" style="color:var(--ink);font-size:14px"><input id="gnums" type="checkbox"> Liczby obrażeń nad wrogami</label>
       <div class="row"><div style="flex:1"><label for="shs">Jakość cieni</label><select id="shs"><option value="1024">Niska (1024)</option><option value="2048">Średnia (2048)</option><option value="4096">Wysoka (4096)</option></select></div>
       <div style="flex:1"><label for="pxr">Rozdzielczość</label><select id="pxr"><option value="1">100%</option><option value="1.5">150%</option><option value="2">200%</option></select></div></div>
       <label class="row" style="color:var(--ink);font-size:14px"><input id="lodc" type="checkbox"> Uproszczone dalekie drzewa (LOD)</label>
@@ -495,10 +523,10 @@ input,select{border-radius:0!important;border:none!important;background:#1a120b!
       <p class="note" id="coopnote">Test w tej wersji: otwórz grę w drugiej karcie tej samej przeglądarki, w jednej kliknij Hostuj, w drugiej Dołącz. Gra przez Radmin VPN między komputerami działa w wersji .exe (połączenie po IP z Radmina).</p>
     </section>
   </div>
-  <div class="btns" style="justify-content:flex-end;margin-top:16px"><button id="closemenu" class="pri">Wróć do gry</button></div>
+  <div class="btns" style="justify-content:space-between;margin-top:16px"><button id="quitgame" style="background:#5a1f1a;border-color:#a8402a;color:#ffd8c8">⏻ Wyjdź z gry</button><button id="closemenu" class="pri">Wróć do gry</button></div>
 </div></div>
 
-<div id="loading"><div class="card pane"><h1>Gra CO-OP</h1><p class="sub" style="margin:6px 0 0">Generuję świat…</p><div id="lb"><div id="loadbar"></div></div></div></div>
+<div id="loading"><div class="card pane"><h1>Pintar</h1><p class="sub" style="margin:6px 0 0">Generuję świat…</p><div id="lb"><div id="loadbar"></div></div></div></div>
 
 <script>
 window.__err=function(m){var s=document.querySelector('#loading .sub');if(s){s.textContent='Błąd: '+m;s.style.color='#ff9b8a'}};

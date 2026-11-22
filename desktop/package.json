@@ -1,6 +1,6 @@
 {
-  "name": "pintar",
-  "productName": "Pintar",
+  "name": "gra-coop",
+  "productName": "Gra CO-OP",
   "version": "1.0.0",
   "description": "Kooperacyjna gra voxelowa (Radmin VPN)",
   "main": "main.js",
@@ -19,7 +19,7 @@
   },
   "build": {
     "appId": "eu.navro.gracoop",
-    "productName": "Pintar",
+    "productName": "Gra CO-OP",
     "directories": { "output": "dist" },
     "files": ["main.js", "preload.js", "app/**/*", "build/icon.png", "package.json"],
     "icon": "build/icon.png",
@@ -34,11 +34,11 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "shortcutName": "Pintar",
-      "artifactName": "Pintar-${version}-instalator.${ext}"
+      "shortcutName": "Gra CO-OP",
+      "artifactName": "Gra-CO-OP-${version}-instalator.${ext}"
     },
     "portable": {
-      "artifactName": "Pintar-${version}-portable.${ext}"
+      "artifactName": "Gra-CO-OP-${version}-portable.${ext}"
     }
   }
 }

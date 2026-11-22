@@ -927,6 +927,8 @@ const FALLS=[];
 const UWC=new THREE.Color(0x24607f);
 
 // ---------- geometria wokselowa ----------
+// v119: pamięć gotowych brył dla powtarzalnych części (stwory, konie, ozdoby) — bez ponownego składania przy każdym pojawieniu się
+const BXC=new Map();function boxesC(list){if(list.length>600)return boxes(list);const k=JSON.stringify(list);let g=BXC.get(k);if(!g){g=boxes(list);g.userData.keep=1;BXC.set(k,g);if(BXC.size>1500){const f=BXC.keys().next().value;BXC.delete(f)}}return g}
 function boxes(list){return voxGeo(deZ(vb(list.map(b=>typeof b[6]==='string'&&b[6][0]==='!'?[b[0],b[1],b[2],b[3],b[4],b[5],b[6].slice(1)].concat(b.slice(7)):b))),.06)}
 const GLOWMAT=new THREE.MeshBasicMaterial({vertexColors:true});   // wszystkie modele gry idą przez voxGeo z kitu
 // =================== GRAFIKA PINTARA: dopasowanie do gry ===================
@@ -969,10 +971,11 @@ function rebuildInst(){
   const px=player.p.x,pz=player.p.z,RF=S.rd*C+20,RF2=RF*RF,Dm2=OPT.lodD*OPT.lodD;
   for(const ch of chunks.values()){if(!ch.decos||!ch.mesh)continue;const cx=ch.cx*C+16,cz=ch.cz*C+16;const cdist=Math.hypot(cx-px,cz-pz);if(cdist>Math.min(RF,TREEMAX)+24)continue;
     _sph.center.set(cx,WATER+18,cz);_sph.radius=70;if(!_fr.intersectsSphere(_sph))continue;
-    for(const D of (cdist<200&&ch.decoS?[ch.decos,ch.decoS]:[ch.decos]))for(let i=0;i<D.length;i+=6){const t=D[i],k0=TK[t],dx=D[i+1]-px,dz=D[i+3]-pz,d2=dx*dx+dz*dz;if(d2>RF2)continue;const md=MAXD[k0];if(md&&d2>md*md)continue;if(d2>TREEMAX*TREEMAX)continue;
-      const k=(OPT.lod&&IMS[k0+'_l']&&d2>Dm2)?k0+'_l':k0,n=cnt[k];if(n>=ICAP)continue;cnt[k]++;
-      _dm.position.set(D[i+1],D[i+2],D[i+3]);_dm.rotation.set(0,Math.floor(D[i+5]/(Math.PI/2))*Math.PI/2,0);_dm.scale.setScalar(D[i+4]*SCL[k0]);_dm.updateMatrix();IMS[k].setMatrixAt(n,_dm.matrix);
-      if(t===7)IMS[k].setColorAt(n,_cc.setHex(FLOWC[Math.floor(D[i+5]*10)%FLOWC.length]))}}
+    for(const D of (cdist<200&&ch.decoS?[ch.decos,ch.decoS]:[ch.decos])){/* v119: macierze dekoracji liczone raz na fragment mapy */let MX=D.__mx;if(!MX){MX=D.__mx=new Float32Array(D.length/6*16);for(let i=0,j=0;i<D.length;i+=6,j++){const k0=TK[D[i]];_dm.position.set(D[i+1],D[i+2],D[i+3]);_dm.rotation.set(0,Math.floor(D[i+5]/(Math.PI/2))*Math.PI/2,0);_dm.scale.setScalar(D[i+4]*(SCL[k0]||TS));_dm.updateMatrix();MX.set(_dm.matrix.elements,j*16)}}
+      for(let i=0;i<D.length;i+=6){const t=D[i],k0=TK[t],dx=D[i+1]-px,dz=D[i+3]-pz,d2=dx*dx+dz*dz;if(d2>RF2)continue;const md=MAXD[k0];if(md&&d2>md*md)continue;if(d2>TREEMAX*TREEMAX)continue;
+      const k=(OPT.lod&&IMS[k0+'_l']&&d2>Dm2)?k0+'_l':k0,n=cnt[k];if(!IMS[k]||n>=ICAP)continue;cnt[k]++;
+      {const IM=IMS[k],ar=IM.instanceMatrix&&IM.instanceMatrix.array;if(ar)ar.set(MX.subarray(i/6*16,i/6*16+16),n*16);else{const el=_dm.matrix.elements,o=i/6*16;for(let q=0;q<16;q++)el[q]=MX[o+q];IM.setMatrixAt(n,_dm.matrix)}}
+      if(t===7)IMS[k].setColorAt(n,_cc.setHex(FLOWC[Math.floor(D[i+5]*10)%FLOWC.length]))}}}
   instTotal=0;for(const k in IMS){IMS[k].count=cnt[k];instTotal+=cnt[k];IMS[k].instanceMatrix.needsUpdate=true;if(IMS[k].instanceColor)IMS[k].instanceColor.needsUpdate=true}
   instDirty=false;
 }
@@ -980,7 +983,7 @@ let camMoved=false,shF=0;
 function instFrame(){
   const c=camera.position;camMoved=Math.abs(c.x-lastCam.x)>2||Math.abs(c.y-lastCam.y)>2||Math.abs(c.z-lastCam.z)>2||Math.abs(yaw-lastCam.yaw)>0.04||Math.abs(pitch-lastCam.pitch)>0.04;
   if(camMoved||instDirty){lastCam.x=c.x;lastCam.y=c.y;lastCam.z=c.z;lastCam.yaw=yaw;lastCam.pitch=pitch;rebuildInst()}
-  shF++;renderer.shadowMap.needsUpdate=S.shadows&&(camMoved||P2.atkT>0?shF%2===0:shF%4===0);   // cienie co 2 klatki w ruchu, co 4 w bezruchu
+  shF++;renderer.shadowMap.needsUpdate=S.shadows&&(camMoved||P2.atkT>0?shF%3===0:shF%6===0);   // cienie co 2 klatki w ruchu, co 4 w bezruchu
 }
 
 // --- pora dnia i roku (cykl z kitu) ---
@@ -1208,7 +1211,7 @@ function makeChar(look,extra){
   const col=(arr,v)=>typeof v==='string'?v:arr[v%arr.length];
   const skin=col(SKINS,L.skin),hair=col(HAIRC,L.hairC),tun=col(CLOTHC,L.tunic),pan=col(CLOTHC,L.pants),boo=col(CLOTHC,L.boots),eye=col(EYEC,L.eyes);
   const tunD=darker(tun,0.74),tunL=darker(tun,1.15),panD=darker(pan,0.78),booD=darker(boo,0.72),hairD=darker(hair,0.8),skinD=darker(skin,0.9),bw=L.build===2?1.24:L.build?1.12:1,fem=!!L.fem,belt=col(BELTC,L.belt||0);
-  const part=(list,mat)=>{const m=new THREE.Mesh(E.pint?boxes(list.map(b=>b.slice(0,7))):rboxes(list),mat||E.mat||decoMat);m.castShadow=true;return m};
+  const part=(list,mat)=>{const m=new THREE.Mesh(E.pint?boxesC(list.map(b=>b.slice(0,7))):rboxes(list),mat||E.mat||decoMat);m.castShadow=true;return m};
   const g=new THREE.Group();
   // nogi (biodro na 0,74)
   const leg=x=>{const p=new THREE.Group();p.position.set(x,0.74,0);p.add(part([[0,-0.2,0,0.21,0.38,0.24,pan],[0,-0.47,0,0.19,0.2,0.215,pan],[0,-0.35,0.118,0.11,0.09,0.012,panD,0],
@@ -3023,7 +3026,7 @@ const HORSE=(()=>{const BR='#6a3a22',BT='#835230',BD='#4a2a16',MN='#2e1a0e',WH='
   legU:voxGeo([[-1.1,-3.8,-1.1,2.2,3.8,2.2,BR],[-1.15,-4.1,-1.15,2.3,.8,2.3,BD]]),legL:voxGeo([[-.95,-1.4,-.95,1.9,1.4,1.9,BD],[-1.05,-2.8,-1.05,2.1,1.5,2.1,WH],[-.95,-3.5,-.95,1.9,.8,1.9,BD],[-1,-4,-1,2,.5,2,GR]]),leg:voxGeo([[-.8,-7.6,-.8,1.6,7.6,1.6,BR],[-.9,-8,-.9,1.8,1.2,1.8,'#2a1a10']]),
   tail:voxGeo(tail)}})();
 /* koń od zera: szyja to jeden prostopadłościan obrócony o 45°, głowa to klocki pochylone w dół */
-function hrsNeckHead(){const BR='#6a3a22',MN='#2e1a0e',GR='#8c9094',BXM=(x,y,z,w,h,d,c)=>{const m=new THREE.Mesh(voxGeo([[x,y,z,w,h,d,c]],0),matV);m.castShadow=true;return m};
+function hrsNeckHead(){const BR='#6a3a22',MN='#2e1a0e',GR='#8c9094',BXM=(x,y,z,w,h,d,c)=>{const k='h'+x+','+y+','+z+','+w+','+h+','+d+c;let g=BXC.get(k);if(!g){g=voxGeo([[x,y,z,w,h,d,c]],0);g.userData.keep=1;BXC.set(k,g)}const m=new THREE.Mesh(g,matV);m.castShadow=true;return m};
   const head=new THREE.Group(),nk=new THREE.Group();nk.rotation.x=.6;
   nk.add(BXM(-1.8,0,-1.9,3.6,6.4,3.8,BR));for(let i=0;i<5;i++){const dp=i%2?2.2:2.7;nk.add(BXM(-1,.2+i*1.2,-1.9-dp+.5,2,2.3,dp,i%3?MN:'#3c2414'))}nk.add(BXM(-1.1,5.9,-1.8,2.2,1.6,3,MN));head.add(nk);
   const hp=new THREE.Group();hp.position.set(0,5.28*V,3.61*V);hp.scale.setScalar(.88);head.add(hp);
@@ -3786,7 +3789,7 @@ const HUM={
  krol_s:{sc:1,look:{skin:'#efe9d6',hairC:'#efe9d6',hair:'lysy',beard:'brak',tunic:'#7a2a2a',pants:'#d8d0b8',boots:'#3a3a40',cape:1,capeC:'#a8352a'},ex:{pint:1,skull:1,ribs:1,hat:'korona',armor:'#6a6f74',glow:'#ff3a2a'},w:'miecz',rar:4},
  faraon:{sc:1,look:{skin:'#d8cfa8',hairC:'#d8cfa8',hair:'lysy',beard:'brak',tunic:'#d8cfa8',pants:'#cfc6a0',boots:'#d9b23a',cape:1,capeC:'#2f5f8f'},ex:{pint:1,skull:1,glow:'#7fe3ff',wraps:1,hat:'nemes'},w:'kostur',rar:4},
 };
-const HD=(p,l,glow)=>{if(!p)return;const G=l.filter(b=>typeof b[6]==='string'&&b[6][0]==='!'),N=l.filter(b=>!(typeof b[6]==='string'&&b[6][0]==='!'));if(N.length){const mm=new THREE.Mesh(boxes(N),decoMat);mm.castShadow=true;p.add(mm)}if(G.length)p.add(new THREE.Mesh(boxes(G),GLOWMAT))};
+const HD=(p,l,glow)=>{if(!p)return;const G=l.filter(b=>typeof b[6]==='string'&&b[6][0]==='!'),N=l.filter(b=>!(typeof b[6]==='string'&&b[6][0]==='!'));if(N.length){const mm=new THREE.Mesh(boxesC(N),decoMat);mm.castShadow=true;p.add(mm)}if(G.length)p.add(new THREE.Mesh(boxes(G),GLOWMAT))};
 const HDECO={
  troll:(u,H)=>{const s=H.look.skin,sd=darker(s,0.8);HD(u.torso,[[0,0.18,0.17,0.46,0.3,0.1,s],[0,0.06,0.2,0.3,0.12,0.06,sd],[0,-0.12,0.17,0.4,0.22,0.06,'#6b4a2b'],[0,0.5,0.17,0.32,0.03,0.02,'#e8e0c8'],[0.08,0.46,0.18,0.05,0.07,0.03,'#e8e0c8'],[-0.08,0.46,0.18,0.05,0.07,0.03,'#e8e0c8']]);HD(u.head,[[0,0.24,0.27,0.13,0.13,0.08,sd],[0.15,0.42,0.24,0.05,0.05,0.02,sd],[-0.12,0.18,0.245,0.04,0.04,0.02,sd],[0,0.12,0.245,0.18,0.03,0.012,'#2a1a10']])},
  ork:(u,H)=>{HD(u.head,[[0.13,0.25,0.246,0.1,0.025,0.01,'#a8302a'],[-0.13,0.25,0.246,0.1,0.025,0.01,'#a8302a'],[0,0.36,0.246,0.025,0.12,0.01,'#a8302a'],[0,0.2,0.27,0.05,0.03,0.03,'#c9a24a'],[-0.16,0.3,0.247,0.03,0.14,0.01,'#4a2a1a']]);for(const a of [u.la,u.ra])HD(a,[[0,0.12,0,0.06,0.12,0.06,'#d8d0b8'],[0,0.2,0,0.035,0.06,0.035,'#e8e0c8']])},
@@ -5922,7 +5925,7 @@ function streetLights(){const night=hour>=18.3||hour<6.6,p=player.p,cand=[];
     const far=[...cell.values()].sort((a,b)=>a.d-b.d).slice(0,18).map(e=>[e.d,[e.x/e.n,e.y/e.n,e.z/e.n],e.r+6+Math.min(10,e.n*1.5),Math.min(3.2,e.I*(0.8+Math.sqrt(e.n)*0.35))]);cand.length=0;cand.push(...near,...far)}const fl=1+Math.sin(performance.now()*0.011)*0.04;
   for(let k=0;k<48;k++){const U=SEAS_U.uLamp.value[12+k],c=cand[k];if(c){U.set(c[1][0],c[1][1]-0.6,c[1][2],c[2]||14);SEAS_U.uLampI.value[12+k]=(c[3]||1.5)*fl;if(c[4])SEAS_U.uLampC.value[12+k].set(c[4][0],c[4][1],c[4][2]);else SEAS_U.uLampC.value[12+k].set(1,.76,.42)}else{U.w=0;SEAS_U.uLampI.value[12+k]=0}}}
 function villageTrees(v,g){if(v._treeG){g.remove(v._treeG);try{v._treeG.traverse(o=>{if(o.isInstancedMesh&&o.dispose)o.dispose()})}catch(_){}v._treeG=null}const T=v._trees;if(!T||!T.length)return;const tg=new THREE.Group();g.add(tg);v._treeG=tg;g=tg;v.props=(v.props||[]).filter(p=>!p.tree);const KS={niziolki:['oak','maple','oak','birch'],drowy:['pine','pine','oak'],saurianie:['palm','acacia','palm','oak'],ludzie:['oak','maple','birch','oak'],elfy:['birch','sakura','maple','birch'],krasnoludy:['pine','pine','oak','birch'],orkowie:['oak','acacia','pine','oak']}[v.race]||['oak'];
-  const by={},m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),pv=new THREE.Vector3(),sv=new THREE.Vector3();v.props=v.props||[];
+  const by={},m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),pv=new THREE.Vector3(),sv=new THREE.Vector3();v.props=(v.props||[]).filter(q=>!q.tree);v._pg=null;/* v118: bez dublowania drzew przy każdej przebudowie */
   T.forEach(([x,z,s],i)=>{const k=KS[(Math.abs(Math.round(x*7+z*13))+i)%KS.length];if(!OBJGEO[k])return;const wx=v.x+x*BS,wz=v.z+z*BS;let gy=colAt(wx,wz);if(gy==null){v._treeDirty=1;return}const sc=(0.72+0.22*s)*(SCL[k]||TS);(by[k]=by[k]||[]).push([wx,gy,wz,sc,((i*2.4)%6.28)]);v.props.push({x:wx,z:wz,r:0.5,tree:1})});
   for(const k in by){const L=by[k],im=new THREE.InstancedMesh(OBJGEO[k],imMat(k),L.length);L.forEach(([x,y,z,sc,ry],i)=>{e.set(0,ry,0);q.setFromEuler(e);m4.compose(pv.set(x,y,z),q,sv.set(sc,sc,sc));im.setMatrixAt(i,m4)});im.instanceMatrix.needsUpdate=true;im.castShadow=true;im.receiveShadow=true;im.userData.keep=1;im.frustumCulled=false;g.add(im)}}
 function buildVillage(v){
@@ -6006,6 +6009,27 @@ function npcPath(n,v){
   n.path={seg,T,off:r()*T};return n.path;
 }
 function npcWalkPos(n,t){const P=n.path,tt=((t+P.off)%P.T+P.T)%P.T;for(const s of P.seg){if(tt<s.t0+s.tw+s.pause){const k=Math.min(1,(tt-s.t0)/s.tw);return[s.a[0]+(s.b[0]-s.a[0])*k,s.a[1]+(s.b[1]-s.a[1])*k,Math.atan2(s.b[0]-s.a[0],s.b[1]-s.a[1]),k<1]}}const s=P.seg[0];return[s.a[0],s.a[1],0,false]}
+// v119: uproszczony model dalekiego mieszkańca — wszystkie części postaci scalone w 1–3 siatki (zamiast ~25), bez animacji
+function npcImpostor(n){const root=n.m,G=root.userData.g||n._G||(root.userData.head?root.children.find(c=>c.isGroup||c.type==='Group')||root:null);if(!G)return null;root.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(root.matrixWorld).invert(),by=new Map();
+  G.traverse(o=>{if(!o.isMesh||!o.visible||!o.geometry||!o.geometry.attributes.position)return;let q=o,vis=true;while(q&&q!==root){if(!q.visible){vis=false;break}q=q.parent}if(!vis)return;const m=o.material;if(Array.isArray(m)||(m&&m.transparent))return;let a=by.get(m);if(!a){a=[];by.set(m,a)}a.push(o)});
+  const out=new THREE.Group(),M=new THREE.Matrix4();
+  for(const [mat,L] of by){let nv=0;const geos=L.map(o=>{const g=o.geometry.index?o.geometry.toNonIndexed():o.geometry;nv+=g.attributes.position.count;return [o,g]});
+    const pos=new Float32Array(nv*3),nor=new Float32Array(nv*3),col=new Float32Array(nv*3).fill(1),uv=new Float32Array(nv*2);let off=0,hasUV=false,hasC=false;
+    for(const [o,g] of geos){M.multiplyMatrices(inv,o.matrixWorld);const P=g.attributes.position,N=g.attributes.normal,C=g.attributes.color,U=g.attributes.uv;
+      const e=M.elements,PA=P.array,NA=N&&N.array;for(let i=0;i<P.count;i++){const x=PA[i*3],y=PA[i*3+1],z=PA[i*3+2],j=(off+i)*3;pos[j]=e[0]*x+e[4]*y+e[8]*z+e[12];pos[j+1]=e[1]*x+e[5]*y+e[9]*z+e[13];pos[j+2]=e[2]*x+e[6]*y+e[10]*z+e[14];if(NA){const a=NA[i*3],b=NA[i*3+1],c=NA[i*3+2];let nx=e[0]*a+e[4]*b+e[8]*c,ny=e[1]*a+e[5]*b+e[9]*c,nz=e[2]*a+e[6]*b+e[10]*c;const l=Math.hypot(nx,ny,nz)||1;nor[j]=nx/l;nor[j+1]=ny/l;nor[j+2]=nz/l}
+        if(C){hasC=true;col[j]=C.array[i*C.itemSize];col[j+1]=C.array[i*C.itemSize+1];col[j+2]=C.array[i*C.itemSize+2]}if(U){hasUV=true;uv[(off+i)*2]=U.array[i*2];uv[(off+i)*2+1]=U.array[i*2+1]}}off+=P.count}
+    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('normal',new THREE.BufferAttribute(nor,3));if(hasC)g.setAttribute('color',new THREE.BufferAttribute(col,3));if(hasUV)g.setAttribute('uv',new THREE.BufferAttribute(uv,2));
+    for(const k of ['aT','aPart','aW']){const a0=geos[0][1].attributes[k];if(a0){const isz=a0.itemSize,A=new Float32Array(nv*isz);let o2=0;for(const [,gg] of geos){const a=gg.attributes[k];if(a)A.set(a.array.subarray(0,gg.attributes.position.count*isz),o2*isz);o2+=gg.attributes.position.count}g.setAttribute(k,new THREE.BufferAttribute(A,isz))}}
+    g.computeBoundingSphere();const mm=new THREE.Mesh(g,mat);mm.castShadow=true;mm.receiveShadow=true;out.add(mm)}
+  out.userData.noVox=1;out.visible=false;root.add(out);return out}
+function npcLOD(n,far){const G=n.m&&(n.m.userData.g||n._G);if(!G)return;if(far){if(n._imp==null){try{n._imp=npcImpostor(n)}catch(e){n._imp=false;window.__impErr=String(e&&e.stack||e).slice(0,400)}}if(n._imp&&!n._impOn){n._impOn=1;n._imp.visible=true;G.visible=false}}
+  else if(n._impOn){n._impOn=0;if(n._imp)n._imp.visible=false;G.visible=true}}
+// inne postacie w osadzie (strażnicy na murach, kupcy przy straganach) — ten sam uproszczony model z daleka
+function staticCharLOD(v){const t=performance.now();if(v._sclT&&t-v._sclT<500)return;v._sclT=t;if(!v._scl){const npcM=new Set(v.npcs.map(n=>n.m));v._scl=v.g.children.filter(c=>c.userData&&c.userData.head&&!npcM.has(c)).map(c=>{const G=c.children.find(q=>q.isGroup||q.type==='Group');return G?{m:c,_G:G}:null}).filter(Boolean)}
+  for(const o of v._scl){const wx=o.m.position.x+v.g.position.x,wz=o.m.position.z+v.g.position.z,far=Math.abs(wx-player.p.x)>26||Math.abs(wz-player.p.z)>26;npcLOD(o,far)}}
+// v119: statyczne części osady (domy, ozdoby, mury) nie przeliczają macierzy w każdej klatce
+function freezeVillage(v){const t=performance.now();if(v._frzT&&t-v._frzT<3000)return;v._frzT=t;const skip=new Set();for(const n of v.npcs){if(n.m)skip.add(n.m);if(n.stall)skip.add(n.stall);if(n.anvil)skip.add(n.anvil);if(n.pet)skip.add(n.pet)}for(const m of (v.millS||[]))skip.add(m);
+  const fr=o=>{if(skip.has(o)||(o.userData&&(o.userData.head||o.userData.anim)))return;if(o.matrixAutoUpdate){o.updateMatrix();o.matrixAutoUpdate=false}for(const c of o.children)fr(c)};for(const c of v.g.children)fr(c)}
 function npcTick(dt){
   nearNpc=null;let nd=3.2;
   for(const v of villages.values()){if(!v||!v.g)continue;
@@ -6015,8 +6039,14 @@ function npcTick(dt){
     {const DG=[];const rr=(v.city?v.Hs:30)+AIP.npcPad;for(const e of enemies.values()){if(e.pas||e.st===2||e.car)continue;const d=EDEF[e.t];if(!d||d.passive||d.ally||!(d.aggro>0))continue;if(Math.abs(e.p.x-v.x)<rr&&Math.abs(e.p.z-v.z)<rr)DG.push(e)}v._dgL=DG;
       let dg=false;if(DG.length)for(const n of v.npcs){if(n.role==='straz')continue;for(const e of DG)if(Math.abs(e.p.x-n.x)<14&&Math.abs(e.p.z-n.z)<14&&Math.hypot(e.p.x-n.x,e.p.z-n.z)<14){dg=true;break}if(dg)break}
       if(dg&&!v._dg&&Math.hypot(player.p.x-v.x,player.p.z-v.z)<rr+20)toast('Mieszkańcy w pobliżu wroga chowają się do domów!','#ff9d6b');v._dg=dg}
-    const night=hour>=21.5||hour<5.3;
-    for(const n of v.npcs){if(!n.m)continue;
+    try{staticCharLOD(v)}catch(_){}
+    try{freezeVillage(v)}catch(_){}
+    const night=hour>=21.5||hour<5.3,dt0=dt;
+    for(const n of v.npcs){if(!n.m)continue;let dt=dt0;
+      {/* v118: dalecy mieszkańcy liczeni co 4. klatkę, bardzo dalecy ukryci */const fx=Math.abs(n.x-player.p.x),fz=Math.abs(n.z-player.p.z),far=fx>55||fz>55;
+        if(fx>110||fz>110){if(!n.hid&&n.m.visible){n.m.visible=false;n._farH=1}}else if(n._farH){n._farH=0;if(!n.hid)n.m.visible=true}
+        npcLOD(n,(fx>26||fz>26)&&!(dlg&&dlg.n===n));
+        if(far&&!(dlg&&dlg.n===n)){n._acc=(n._acc||0)+dt;n._fi=((n._fi||0)+1)&3;if(n._fi)continue;dt=Math.min(n._acc,0.5);n._acc=0}}
       {const talk=dlg&&dlg.n===n;if(talk){n.run=null;if(n.hid){n.hid=false;n.m.visible=true}n.m.rotation.y=Math.atan2(player.p.x-n.x,player.p.z-n.z)}const nearE=v._dg&&n.role!=='straz'&&(v._dgL||[]).some(e=>Math.abs(e.p.x-n.x)<14&&Math.abs(e.p.z-n.z)<14&&Math.hypot(e.p.x-n.x,e.p.z-n.z)<14);if(nearE)n._hideT=performance.now();const want=!talk&&!v.wander&&((night&&(n.role==='mieszk'||n.role==='wedr'||n.farmer))||nearE||(n._hideT&&performance.now()-n._hideT<6000));
         if(want&&!n.hid){if(v._dg&&!n.inside){if(!n.run){let hb=null,hd=1e9;for(const h of v.houses){const d=Math.hypot((h.cx??h.x)-n.x,(h.cz??h.z)-n.z);if(d<hd){hd=d;hb=h}}n.run=hb?[hb.cx??hb.x,hb.cz??hb.z]:[v.x,v.z]}
             const dx=n.run[0]-n.x,dz=n.run[1]-n.z,d=Math.hypot(dx,dz);if(d>1.4){const s=Math.min(d,AIP.npcRun*dt);n.x+=dx/d*s;n.z+=dz/d*s;n.m.position.x=n.x;n.m.position.z=n.z;n.m.rotation.y=Math.atan2(dx,dz);const G=n.m.userData.g;if(G)animChar(G,4,dt,false,false);if(dlg&&dlg.n===n)closeDialog();continue}}
@@ -6028,8 +6058,9 @@ function npcTick(dt){
       if(pth){const near=Math.hypot(player.p.x-n.x,player.p.z-n.z)<4.2||(dlg&&dlg.n===n)||!!n.chat;if(near)n.hold=(n.hold||0)+dt;
         const [wx,wz,wr,mv]=npcWalkPos(n,worldT-(n.hold||0));
         if(!near){const dx=wx-n.x,dz=wz-n.z,dd=Math.hypot(dx,dz);if(dd>3){n.x=wx;n.z=wz}else if(dd>0.01){const st=Math.min(dd,2.2*dt*(dd>0.4?1.6:1));n.x+=dx/dd*st;n.z+=dz/dd*st}n.ry=wr;moving=mv;n.m.position.x=n.x;n.m.position.z=n.z}}
-      const gu=n.m.userData.g&&n.m.userData.g.userData;if(gu&&pth)animChar(n.m.userData.g,moving?1.25:0,dt,false,false);
-      {if(!v._doors)v._doors=v.houses.filter(q=>q.core).map(q=>{const [dx,dz]=doorOf(q);return[dx,dz,Math.sin(q.rot),Math.cos(q.rot)]});for(const [dx,dz,fx,fz] of v._doors){const ex=n.x-dx,ez=n.z-dz;if(Math.abs(ex)>4||Math.abs(ez)>4)continue;const fw=ex*fx+ez*fz,lt=ex*fz-ez*fx;if(fw>-1.2&&fw<2.6&&Math.abs(lt)<2){const nl=(lt>=0?2:-2);n.x=dx+fx*fw+fz*nl;n.z=dz+fz*fw-fx*nl;n.m.position.x=n.x;n.m.position.z=n.z}}}
+      const gu=n.m.userData.g&&n.m.userData.g.userData;if(gu&&pth&&!n._impOn)animChar(n.m.userData.g,moving?1.25:0,dt,false,false);
+      {if(!v._doors){v._doors=v.houses.filter(q=>q.core).map(q=>{const [dx,dz]=doorOf(q);return[dx,dz,Math.sin(q.rot),Math.cos(q.rot)]});const DG2=new Map();for(const d of v._doors){const k=Math.floor(d[0]/8)*65536+Math.floor(d[1]/8);let a=DG2.get(k);if(!a){a=[];DG2.set(k,a)}a.push(d)}v._dgr=DG2}
+        const DN=[];{const cx=Math.floor(n.x/8),cz=Math.floor(n.z/8);for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const a=v._dgr.get((cx+i)*65536+cz+j);if(a)for(const d of a)DN.push(d)}}for(const [dx,dz,fx,fz] of DN){const ex=n.x-dx,ez=n.z-dz;if(Math.abs(ex)>4||Math.abs(ez)>4)continue;const fw=ex*fx+ez*fz,lt=ex*fz-ez*fx;if(fw>-1.2&&fw<2.6&&Math.abs(lt)<2){const nl=(lt>=0?2:-2);n.x=dx+fx*fw+fz*nl;n.z=dz+fz*fw-fx*nl;n.m.position.x=n.x;n.m.position.z=n.z}}}
       let h=colAt(n.x,n.z);const vg=villageGround(n.x,n.z,999);if(vg!==null&&(h===null||vg>h))h=vg;if(h!==null)n.m.position.y=h+0.003;/* +3 mm: podeszwy nie leżą w płaszczyźnie podłoża */
       const dx=player.p.x-n.x,dz=player.p.z-n.z,d=Math.hypot(dx,dz);const u=n.m.userData;u.ph+=dt;
       let tr=n.ry;if(n.chat&&n.chatFace!=null)tr=n.chatFace;else if(d<(pth?4.2:7))tr=Math.atan2(dx,dz);let dr=tr-n.m.rotation.y;dr=Math.atan2(Math.sin(dr),Math.cos(dr));n.m.rotation.y+=dr*Math.min(1,(moving?8:5)*dt);
@@ -6159,7 +6190,7 @@ function voxQueue(obj,owner){if(!obj)return;const meshes=[];
   const chain=[];let q=obj.parent,lim=0;while(q&&q!==scene&&q.isObject3D===true&&q.position&&q.scale&&lim++<12){chain.unshift(q);q=q.parent}walk(obj,chain);for(const [m,ch] of meshes)VQ.push({owner,m,ch,st:0})}
 function voxRemove(owner){for(let i=VQ.length-1;i>=0;i--)if(VQ[i].owner===owner)VQ.splice(i,1);const ks=VOWN.get(owner);if(!ks)return;for(const k of ks){const L=VOX.get(k);if(!L)continue;const f=L.filter(e=>e.o!==owner);if(f.length)VOX.set(k,f);else VOX.delete(k)}VOWN.delete(owner)}
 let _vqSort=0;const _vqV=new THREE.Vector3();
-function voxTick(){const t0=performance.now(),BUD=VQ.length>40?9:VQ.length>10?6:3.5;
+function voxTick(){const t0=performance.now(),BUD=VQ.length>40?3.5:VQ.length>10?2.5:1.8;
   // najpierw to, co najbliżej gracza (zamki, budowle, domy obok nas mają kolizje od razu)
   if(VQ.length>1&&t0-_vqSort>400&&typeof player!=='undefined'){_vqSort=t0;const p=player.p;for(const J of VQ){if(J.T){J._d=-1;continue}try{J.m.getWorldPosition(_vqV);J._d=(_vqV.x-p.x)**2+(_vqV.z-p.z)**2}catch(_){J._d=1e12}}VQ.sort((a,b)=>a._d-b._d)}
   while(VQ.length&&performance.now()-t0<BUD){const J=VQ[0];
@@ -6192,19 +6223,24 @@ function villageCollide(p){const me=p===player.p;
   for(const v of villages.values()){if(!v||Math.abs(v.x-p.x)>45+(v.Hs||0)||Math.abs(v.z-p.z)>45+(v.Hs||0))continue;
     // gracz: gdy domy osady mają już kolizję wokselową, ściany i dachy obsługuje ona (można się wspinać i chodzić po dachach)
     const vox=me&&VOWN.has(v.id)&&!VQ.some(j=>j.owner===v.id);
-    for(const h of v.houses){if(!h.core)continue;const ext=h.kcastle||h.big?h.core.pw/2+3:14;if(Math.abs(h.x-p.x)>ext||Math.abs(h.z-p.z)>ext)continue;const k=h.core,c=Math.cos(h.rot),s=Math.sin(h.rot);
+    if(!v._bigH||v._bigHN!==v.houses.length){v._bigH=v.houses.filter(q=>q.kcastle||q.big||q.arena);v._bigHN=v.houses.length}
+    for(const h of housesNear(v,p.x,p.z).concat(v._bigH)){if(!h.core)continue;const ext=h.kcastle||h.big?h.core.pw/2+3:14;if(Math.abs(h.x-p.x)>ext||Math.abs(h.z-p.z)>ext)continue;const k=h.core,c=Math.cos(h.rot),s=Math.sin(h.rot);
       // podest działki: niski można wejść, wysoki blokuje
       {const dx=p.x-h.x,dz=p.z-h.z;let lx=dx*c-dz*s,lz=dx*s+dz*c;const ex=k.pw/2+PR-Math.abs(lx),ez=k.pd/2+PR-Math.abs(lz);
        if(ex>0&&ez>0&&p.y<h.top-0.05){if(h.top-p.y<=1.05&&player.ground)p.y=h.top;else{if(ex<ez)lx+=Math.sign(lx||1)*ex;else lz+=Math.sign(lz||1)*ez;p.x=h.x+lx*c+lz*s;p.z=h.z-lx*s+lz*c}}}
       if(p.y>h.top+(h.kcastle?30:h.big?LMK[h.func].hgt:7)||vox)continue;
       {const dx=p.x-h.cx,dz=p.z-h.cz;let lx=dx*c-dz*s,lz=dx*s+dz*c;const ex=k.w/2+PR-Math.abs(lx),ez=k.d/2+PR-Math.abs(lz);
        if(ex>0&&ez>0){if(ex<ez)lx+=Math.sign(lx||1)*ex;else lz+=Math.sign(lz||1)*ez;p.x=h.cx+lx*c+lz*s;p.z=h.cz-lx*s+lz*c}}}
-    for(const q of (v.props||[])){const dx=p.x-q.x,dz=p.z-q.z,d=Math.hypot(dx,dz),mn=q.r+PR;if(d<mn&&d>1e-4&&p.y<v.h+3){p.x=q.x+dx/d*mn;p.z=q.z+dz/d*mn}}
+    if(v.props&&(!v._pg||v._pgN!==v.props.length)){const G=new Map();for(const q of v.props){const k=Math.floor(q.x/8)*65536+Math.floor(q.z/8);let a=G.get(k);if(!a){a=[];G.set(k,a)}a.push(q)}v._pg=G;v._pgN=v.props.length}
+    const PN=[];if(v._pg){const cx=Math.floor(p.x/8),cz=Math.floor(p.z/8);for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const a=v._pg.get((cx+i)*65536+cz+j);if(a)for(const q of a)PN.push(q)}}
+    for(const q of PN){const dx=p.x-q.x,dz=p.z-q.z,d=Math.hypot(dx,dz),mn=q.r+PR;if(d<mn&&d>1e-4&&p.y<v.h+3){p.x=q.x+dx/d*mn;p.z=q.z+dz/d*mn}}
     if(v.cols)for(const [cx,cz,hw,hd,top,kc] of v.cols){if(p.y>=top-0.05||(kc&&vox))continue;const ex=hw+PR-Math.abs(p.x-cx),ez=hd+PR-Math.abs(p.z-cz);if(ex>0&&ez>0){if(ex<ez)p.x+=Math.sign(p.x-cx||1)*ex;else p.z+=Math.sign(p.z-cz||1)*ez}}}
 }
+function housesNear(v,x,z){/* v118: siatka domów 16 m — zamiast przeglądać wszystkie domy miasta */if(!v._hg||v._hgN!==v.houses.length){const G=new Map();for(const h of v.houses){const k=Math.floor(h.x/16)*65536+Math.floor(h.z/16);let a=G.get(k);if(!a){a=[];G.set(k,a)}a.push(h)}v._hg=G;v._hgN=v.houses.length}
+  const cx=Math.floor(x/16),cz=Math.floor(z/16),out=[];for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const a=v._hg.get((cx+i)*65536+cz+j);if(a)for(const h of a)out.push(h)}return out}
 function villageGround(x,z,y){let best=null;
   for(const v of villages.values()){if(!v||Math.abs(v.x-x)>45+(v.Hs||0)||Math.abs(v.z-z)>45+(v.Hs||0))continue;
-    for(const h of v.houses){if(!h.core||h.top>y+0.3||Math.abs(h.x-x)>14||Math.abs(h.z-z)>14)continue;const c=Math.cos(h.rot),s=Math.sin(h.rot),dx=x-h.x,dz=z-h.z,lx=dx*c-dz*s,lz=dx*s+dz*c;
+    for(const h of housesNear(v,x,z)){if(!h.core||h.top>y+0.3||Math.abs(h.x-x)>14||Math.abs(h.z-z)>14)continue;const c=Math.cos(h.rot),s=Math.sin(h.rot),dx=x-h.x,dz=z-h.z,lx=dx*c-dz*s,lz=dx*s+dz*c;
       if(Math.abs(lx)<h.core.pw/2&&Math.abs(lz)<h.core.pd/2&&(best===null||h.top>best))best=h.top}}
   return best}
 function inVillage(x,z,r){for(const v of villages.values())if(v&&Math.hypot(v.x-x,v.z-z)<r+(v.city?v.Hs*1.2:0))return v;return null}

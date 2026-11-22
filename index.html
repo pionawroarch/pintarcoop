@@ -510,7 +510,7 @@ input,select{border-radius:0!important;border:none!important;background:#1a120b!
       <label for="seed">Ziarno świata (seed)</label>
       <div class="row"><input id="seed" inputmode="numeric"><button id="useseed">Wczytaj</button></div>
       <div class="btns"><button id="newseed">Losuj nowy świat</button></div>
-      <h2 style="margin-top:18px">Postać</h2><div class="btns"><button id="custbtn">Wygląd postaci</button><button id="chgcls">Zmień pasywki</button></div>
+      <h2 style="margin-top:18px">Postać</h2><div class="btns"><button id="custbtn">Wygląd postaci</button><button id="chgcls">Zmień pasywki</button></div><div class="btns"><button id="charexp">Eksportuj postać</button><button id="charimp">Importuj postać</button><input id="charfile" type="file" accept=".json,.pintar,application/json" hidden></div>
     </section>
     <section>
       <h2>Co-op</h2>
@@ -3609,7 +3609,7 @@ addEventListener('mousemove',e=>{if(document.pointerLockElement===cv||dragging){
 cv.addEventListener('wheel',e=>{dist=Math.max(3.5,Math.min(30,dist*(e.deltaY>0?1.1:0.91)));e.preventDefault()},{passive:false});
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 const uiOpen=()=>!$('menu').hidden||!$('chatbox').hidden||!$('clsel').hidden||custOpen()||!$('chestui').hidden||!$('tradeui').hidden;
-addEventListener('beforeunload',e=>{if(S.spawn&&player.ready){e.preventDefault();e.returnValue=''}});
+addEventListener('beforeunload',e=>{if(S.spawn&&player.ready&&!window.__noSave){e.preventDefault();e.returnValue=''}});
 addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'){if(e.code==='Enter'&&e.target.id==='prenin'){const b=document.querySelector('[data-pact="rok"]');b&&b.click();return}if(e.code==='Enter'&&e.target.id==='chatin'){sendChat(e.target.value);e.target.value='';$('chatbox').hidden=true;cv.focus()}if(e.code==='Escape'&&e.target.id==='chatin'){$('chatbox').hidden=true}return}
   if((e.code==='Escape'||e.code==='KeyF')&&!$('chestui').hidden){chestUiClose();return}
@@ -4040,6 +4040,17 @@ const skL=k=>{const x=(HERO.sk&&HERO.sk[k])||0;return Math.min(50,Math.floor(Mat
 function skGain(k,v){HERO.sk=HERO.sk||{};const l0=skL(k);HERO.sk[k]=(HERO.sk[k]||0)+v;const l1=skL(k);if(l1>l0){toast('Umiejętność '+SKILLS.find(s=>s[0]===k)[1]+': poziom '+l1,'#a7e0ff');sfx('lvl',0.5);ST=stats();saveHero()}else if(Math.random()<0.02)saveHero()}
 const need=l=>Math.round(130*Math.pow(l,1.55)+120*l);
 function saveHero(){LS.set('hero',HERO)}
+// v120: eksport i import postaci (wygląd, poziom, perki, pasywki, ekwipunek, wierzchowce) do pliku — np. żeby przenieść ją na inny komputer albo do gry u kolegi
+const CHARKEYS=['name','look','looks','color','hero','inv','mounts','herb','lamp','arenaBest'];
+function charExport(){try{saveHero();saveInv()}catch(_){}const o={pintarChar:1,v:1,date:new Date().toISOString()};for(const k of CHARKEYS){const x=LS.get(k,undefined);if(x!==undefined)o[k]=x}
+  const nm=(o.name||'postac').toString().replace(/[^\wąćęłńóśźżĄĆĘŁŃÓŚŹŻ-]+/g,'_').slice(0,30),txt=JSON.stringify(o);
+  try{const b=new Blob([txt],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='Pintar-postac-'+nm+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove()},1500);toast('Zapisano plik postaci','#bfe7a8')}catch(e){toast('Nie udało się zapisać pliku postaci','#ff9d6b')}
+  try{navigator.clipboard&&navigator.clipboard.writeText(txt).catch(()=>{})}catch(_){}}
+function charImport(txt){let o;try{o=JSON.parse(txt)}catch(e){toast('To nie jest plik postaci Pintar','#ff9d6b');return}if(!o||!o.pintarChar||!o.hero){toast('To nie jest plik postaci Pintar','#ff9d6b');return}
+  if(!confirm('Wczytać postać'+(o.name?' „'+o.name+'”':'')+'? Obecna postać zostanie zastąpiona (wyeksportuj ją wcześniej, jeśli chcesz ją zachować). Gra uruchomi się ponownie.'))return;
+  if(o.inv&&(typeof o.inv!=='object'||typeof o.inv.eq!=='object'||!o.inv.eq))delete o.inv;if(typeof o.hero!=='object')delete o.hero;
+  for(const k of CHARKEYS)if(o[k]!==undefined)LS.set(k,o[k]);window.__noSave=1;toast('Wczytano postać — ponowne uruchamianie…','#bfe7a8');setTimeout(()=>location.reload(),700)}
+try{$('charexp').onclick=charExport;$('charimp').onclick=()=>{const f=$('charfile');f.value='';f.click()};$('charfile').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>charImport(String(r.result));r.readAsText(f)}}catch(e){console.warn('eksport postaci',e)}
 
 // =================== ETAP 2: walka, wrogowie, łup, ekwipunek ===================
 const RAR=[{n:'Zwykły',c:'#e9e6df'},{n:'Niezwykły',c:'#62d26d'},{n:'Rzadki',c:'#4ea3ff'},{n:'Epicki',c:'#b874ff'},{n:'Legendarny',c:'#ff9d2e'}];
@@ -11223,7 +11234,7 @@ requestAnimationFrame(loop);
 // karta w tle: rAF stoi, a host musi dalej wysyłać stan graczy – zegar w workerze nie jest dławiony
 const ticker=new Worker(URL.createObjectURL(new Blob(['setInterval(()=>postMessage(0),50)'],{type:'text/javascript'})));
 ticker.onmessage=()=>{if(document.hidden)loop(performance.now(),true)};
-function saveAllNow(){try{if(player.ready&&!player.hold&&!SPC&&player.p.y<450&&VH.mode!==4&&Number.isFinite(player.p.x+player.p.y+player.p.z)&&player.v.y>-12){LS.set('pos',[player.p.x,player.p.y,player.p.z]);LS.set('posSeed',S.seed)}LS.set('hour',hour);LS.set('wt',worldT);LS.set('yaw',yaw);saveInv();saveW()}catch(e){}}
+function saveAllNow(){if(window.__noSave)return;try{if(player.ready&&!player.hold&&!SPC&&player.p.y<450&&VH.mode!==4&&Number.isFinite(player.p.x+player.p.y+player.p.z)&&player.v.y>-12){LS.set('pos',[player.p.x,player.p.y,player.p.z]);LS.set('posSeed',S.seed)}LS.set('hour',hour);LS.set('wt',worldT);LS.set('yaw',yaw);saveInv();saveW()}catch(e){}}
 addEventListener('beforeunload',()=>{saveAllNow();if(NET.tr)try{NET.tr.send({t:'bye',from:NET.id})}catch(e){}});addEventListener('pagehide',saveAllNow);document.addEventListener('visibilitychange',()=>{if(document.hidden)saveAllNow()});
 }
 window.__mainReady=true;

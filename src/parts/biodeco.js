@@ -9,7 +9,7 @@
      for(const [x,z] of [[4,3],[-4,-3],[3,-4]])P(x,0,z,3,1.4,2,C2);OBJGEO.deadtree=mk([[[A,B,C2],'wood']])}
     // 55 gejzer: stożek z osadów mineralnych, kolorowe baseny tarasowe, kolumna pary
     {const M1='#e8dcc0',M2='#d8a860',M3='#c87a3a',W1='#5ac0c8';P(-26,0,-26,52,1,52,M2);P(-20,1,-20,40,1.4,40,M1);P(-14,2.4,-14,28,2,28,M2);P(-9,4.4,-9,18,3,18,M1);P(-5,7.4,-5,10,3,10,M3);P(-3,10.4,-3,6,0.6,6,'#3a8a9a');
-     for(const [x,z,w] of [[-22,-4,8],[14,8,9],[-6,16,7],[6,-20,8]]){P(x,1,z,w,1.2,w,M3);P(x+1,1.5,z+1,w-2,0.8,w-2,W1)}for(let k=0;k<9;k++){const s=4+k*1.6;{const bb=[-s/2,11+k*7,-s/2,s,7,s,k%2?'#f4f8fa':'#e8eef2'];bb.nc=1;G.push(bb)}}OBJGEO.geyser=mk([[[M1,M2,M3],'stone']])}
+     for(const [x,z,w] of [[-22,-4,8],[14,8,9],[-6,16,7],[6,-20,8]]){P(x,1,z,w,1.2,w,M3);P(x+1,1.5,z+1,w-2,0.8,w-2,W1)}/* v158: kolumna pary/wody animowana cząstkami (27_efekty) */OBJGEO.geyser=mk([[[M1,M2,M3],'stone']])}
     // 56 dynia z liśćmi i wąsem
     {P(-4,0,-4,8,6,8,'#e07a1a');P(-4.4,1,-2,8.8,4,4,'#d06a10');P(-2,1,-4.4,4,4,8.8,'#d06a10');P(-0.6,6,-0.6,1.2,2.4,1.2,'#5a7a2a');P(1,6,-1,4,0.6,3,'#4a8a32');P(-6,0,2,4,0.6,3,'#4a8a32');OBJGEO.pumpkin=mk()}
     // 57 strach na wróble: krzyż z kijów, słomiany kapelusz, łachmany, wrona
@@ -41,7 +41,7 @@
     // 69 drzewo krwawe: czarny pień, karmazynowe liście, czerwony sok spływający po korze
     {const T1='#2a1a18',T2='#3a2420',L1='#8a1a1a',L2='#a82a22',L3='#6a1010';P(-2.5,0,-2.5,5,26,5,T1);P(-0.5,8,2.5,1,8,0.4,'#7a0a0a');P(2.5,12,0,0.4,6,1,'#7a0a0a');P(2,16,-1,12,2.4,2.4,T2);P(12,16,-1,2.4,8,2.4,T1);P(-13,20,-1,12,2.4,2.4,T2);P(-13,20,-1,2.4,8,2.4,T1);P(-12,24,-12,24,10,24,L1);P(-9,34,-9,18,7,18,L2);P(-5,41,-5,10,4,10,L1);P(9,22,-5,9,7,9,L3);P(-18,24,-4,9,7,9,L3);for(let k=0;k<6;k++)P(-10+k*4,22,(k%2?8:-10),0.8,3+k%3,0.8,L2);OBJGEO.bloodtree=mk([[[T1,T2],'wood']])}
     // 70 olbrzymi świecący grzyb: biały trzon, turkusowy kapelusz z kropkami, blaszki
-    {P(-2,0,-2,4,26,4,'#e8e8f0');P(-3,0,-3,6,4,6,'#c8d0d8');P(-14,26,-14,28,4,28,'#2ac8c8');P(-11,30,-11,22,3,22,'#3ad8d8');P(-6,33,-6,12,2,12,'#5ae8e8');P(-12,24,-12,24,2,24,'#1a8a9a');for(const [x,z] of [[-8,-6],[6,4],[-2,9],[9,-8],[-10,6]])P(x,30.5,z,3,1,3,'#c8ffff');for(const [x,z,h] of [[12,6,10],[-14,8,7],[8,-14,8]]){P(x-1,0,z-1,2,h,2,'#e8e8f0');P(x-5,h,z-5,10,3,10,'#3ad8d8')}OBJGEO.glowshroom=mk()}
+    {const GP={st:'#e4e6f0',st2:'#c4ccd8',ring:'#f2f6fc',ring2:'#d8e0ea',gill:'#7af4f4',gill2:'#c8ffff',c1:'#24c0c4',c2:'#1aa2aa',c3:'#14808a',sp:'#d8ffff',sp2:'#a8fcff'},A=shroomL(4.7,GP,{sh:5.4,sw:0.95,seed:21});G.push(...A.L);for(const [x,z,kk,sd] of [[13,7,1.5,2],[-15,8,1.1,4],[8,-15,1.3,6]])G.push(...shroomL(kk,GP,{x,z,sh:4.6,sw:1.1,seed:sd}).L);OBJGEO.glowshroom=mk();OBJGEO.glowshroom.userData.cb=A.CB}
     // 71 olbrzymi kwiat (różowy) i 72 (słonecznik)
     {P(-1,0,-1,2,40,2,'#4a8a32');P(1,14,-1,8,1,4,'#5aa040');P(-9,24,-1,8,1,4,'#5aa040');const C='#e86a9a',C2='#f08ab0';for(let q=0;q<8;q++){const a=q/8*Math.PI*2,x=Math.cos(a)*7,z=Math.sin(a)*7;P(x-4,40,z-4,8,1.5,8,q%2?C:C2)}P(-4,40.5,-4,8,3,8,'#f0d040');P(-2,43,-2,4,1,4,'#e8a020');OBJGEO.giantflower=mk()}
     {P(-1.2,0,-1.2,2.4,46,2.4,'#5a9a3a');P(1,18,-1,10,1,5,'#4a8a32');P(-11,28,-1,10,1,5,'#4a8a32');for(let q=0;q<12;q++){const a=q/12*Math.PI*2,x=Math.cos(a)*8.5,z=Math.sin(a)*8.5;P(x-2.5,44,z-2.5,5,1.2,5,q%2?'#f0c020':'#f8d840')}P(-6,44.4,-6,12,2.4,12,'#5a3a1a');for(let k=0;k<6;k++)P(-5+(k%3)*4,46.8,-4+Math.floor(k/3)*6,2,0.6,2,'#3a2410');OBJGEO.giantflower2=mk()}
@@ -110,7 +110,7 @@
     // 88 kamienna latarnia (tōrō)
     {const S1='#9a968c',S2='#8a867c',S3='#aaa69c';P(-4,0,-4,8,2,8,S2);P(-1.6,2,-1.6,3.2,8,3.2,S1);P(-3.4,10,-3.4,6.8,1.6,6.8,S2);P(-2.6,11.6,-2.6,5.2,4,5.2,S3);P(-1.6,12.4,2.62,3.2,2.4,0.1,'#ffc860');P(-1.6,12.4,-2.72,3.2,2.4,0.1,'#ffc860');P(-5,15.6,-5,10,1.6,10,S2);P(-3.6,17.2,-3.6,7.2,1.4,7.2,S1);P(-1.4,18.6,-1.4,2.8,2,2.8,S3);P(-4,0,3,4,0.8,3,'#5a8a3a');OBJGEO.stonelantern=mk([[[S1,S2,S3],'stone']])}
     // 89 olbrzymie zardzewiałe koło zębate: obręcz z zębami, piasta z nitami, sześć szprych, drugie mniejsze koło, łańcuch, piasek nawiany na dół
-    {const R1='#8a4a2a',R2='#a85a30',R3='#6a3a22',R4='#b86a3a',MT='#5a5a5e',MT2='#4a4a50',Rr=24,cy=Rr*0.6;
+    {/* v151: barwy rdzy i miedzi dobrane tak, by shader nie malował na nich słojów drewna */const R1='#a24a2c',R2='#c47a44',R3='#7a3424',R4='#d08a50',MT='#5a5a5e',MT2='#4a4a50',Rr=24,cy=Rr*0.6;
      for(let i=0;i<40;i++){const a=i/40*Math.PI*2,x=Math.cos(a)*Rr,y=cy+Math.sin(a)*Rr;if(y<-2)continue;P(x-2.6,Math.max(0,y-2.6),-2.4,5.2,5.2,4.8,i%4===0?R4:i%3?R1:R2);if(i%2===0){const tx=Math.cos(a)*(Rr+4),ty=cy+Math.sin(a)*(Rr+4);if(ty>0)P(tx-2,ty-2,-1.8,4,4,3.6,R3)}}
      for(let i=0;i<6;i++){const a=i/6*Math.PI*2+0.3;for(let r=5;r<Rr-2;r+=2.6){const x=Math.cos(a)*r,y=cy+Math.sin(a)*r;if(y>0)P(x-1.3,y-1.3,-1.4,2.6,2.6,2.8,R3)}}
      P(-5,cy-5,-3.4,10,10,6.8,MT);P(-3,cy-3,-4.4,6,6,8.8,MT2);for(let k=0;k<8;k++){const a=k/8*Math.PI*2;P(Math.cos(a)*4-0.5,cy+Math.sin(a)*4-0.5,3.4,1,1,0.6,'#8a8a90')}
@@ -119,10 +119,10 @@
      P(-Rr-8,0,-10,Rr*2+28,2,20,'#6a5a46');P(-Rr-4,2,-6,14,3,12,'#7a6a52');P(Rr-4,2,-8,10,2.4,14,'#7a6a52');for(const [x,z] of [[-20,8],[18,-8],[10,9]])P(x,0,z,5,3,4,'#4a3a2a');
      OBJGEO.gear=mk([[[R1,R2,R3,R4,MT,MT2],'metal']])}
     // 90 rury: dwa pionowe kominy z kołnierzami, poziomy przewód z kolanami, manometr, koło zaworu, nity, kałuża oleju, para (bez kolizji)
-    {const R1='#7a4a30',R2='#8a5a38',R3='#6a3a24',MT='#4a4a50',MT2='#5a5a62',VR='#c8302a';
+    {const R1='#b86a3a',R2='#c47a44',R3='#7a3424',MT='#4a4a50',MT2='#5a5a62',VR='#c8302a';
      for(const sx of [-1,1]){for(let y=0;y<26;y+=6.5)P(sx*10-2,y,-2,4,6.5,4,y%13?R1:R2);for(let y=0;y<26;y+=6.5)P(sx*10-2.5,y,-2.5,5,0.8,5,MT2);P(sx*10-3,0,-3,6,2,6,MT)}
      P(-12,24,-2,24,4,4,R1);for(let x=-10;x<10;x+=4)P(x,23.6,-2.5,0.8,4.8,5,MT2);P(-12.6,23,-2.6,4.2,6,5.2,MT);P(8.4,23,-2.6,4.2,6,5.2,MT);
      P(-1,28,-1,2,4,2,MT);P(-3.4,32,-0.5,6.8,0.8,1,VR);P(-0.5,29.6,-3.4,1,5.6,0.8,VR);P(-0.6,32,-0.6,1.2,0.8,1.2,'#e8c040');
      P(4,18,1.8,3,3,1,'#2a2a2e');P(4.3,18.3,2.6,2.4,2.4,0.3,'#f4f0e6');P(5.3,19.2,2.95,0.3,1.2,0.1,'#c8302a');P(4.8,21,1.9,1,1.6,0.8,MT);
      P(-8,8,-6,2,2,4,R3);P(-8,0,-10,2,10,2,R3);P(-14,0,-8,28,0.6,14,'#5a4a3a');P(2,0.6,4,8,0.2,5,'#141210');
-     for(let k=0;k<7;k++){const s2=2+k*1.3;const bb=[-s2/2+k*0.3,33+k*4,-s2/2,s2,4,s2,k%2?'#f4f6f8':'#e4e8ec'];bb.nc=1;G.push(bb)}for(let k=0;k<3;k++){const bb=[-10.5-k*0.5,27+k*3,-1,2+k,2,2+k,'#eef2f6'];bb.nc=1;G.push(bb)}OBJGEO.pipe=mk([[[R1,R2,R3,MT,MT2],'metal']])}
+     /* v151: para jako nieregularne kłęby zamiast schodkowej kolumny */{const PU=(x,y,z,r,c)=>{for(const [ox,oy,oz,k] of [[0,0,0,1],[r*0.45,r*0.25,r*0.2,0.7],[-r*0.4,r*0.35,-r*0.25,0.65],[r*0.1,r*0.6,-r*0.35,0.55]]){const w=r*k;const bb=[x+ox-w/2,y+oy,z+oz-w/2,w,w*0.8,w,c];bb.nc=1;G.push(bb)}};/* v158: para animowana cząstkami */void PU}OBJGEO.pipe=mk([[[R1,R2,R3,MT,MT2],'metal']])}
